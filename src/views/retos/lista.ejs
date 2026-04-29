@@ -149,7 +149,18 @@
 
                         <div class="reto-desc">
                             <p><%= reto.enunciado.substring(0, 100) %><%= reto.enunciado.length > 100 ? '...' : '' %></p>
-                            <p style="font-size: 0.9em; color: #a1a1aa;"><strong>Lenguaje:</strong> <%= reto.lenguaje %> | <strong>Puntos:</strong> <%= reto.puntos %></p>
+                            <p style="font-size: 0.9em; color: #a1a1aa; margin-bottom: 12px;"><strong>Lenguaje:</strong> <%= reto.lenguaje %> | <strong>Puntos:</strong> <%= reto.puntos %></p>
+                            
+                            <% 
+                                let rRam = '32MB', rCpu = '10%', rTime = '60s';
+                                if (diffLabel === 'Medio') { rRam = '64MB'; rCpu = '30%'; rTime = '300s'; }
+                                else if (diffLabel.includes('Dif') || diffLabel === 'Difícil') { rRam = '128MB'; rCpu = '60%'; rTime = '600s'; }
+                            %>
+                            <div style="display: flex; gap: 12px; font-size: 0.8em; color: #94a3b8; background: #0f111a; padding: 8px 10px; border-radius: 6px; border: 1px solid #1e293b; margin-top: auto;">
+                                <span title="Memoria RAM Estimada">💾 <%= rRam %></span>
+                                <span title="Uso de CPU Estimado">⚡ <%= rCpu %></span>
+                                <span title="Tiempo Límite">⏱️ <%= rTime %></span>
+                            </div>
                         </div>
                     </div>
                     

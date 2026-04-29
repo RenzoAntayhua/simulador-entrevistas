@@ -107,7 +107,10 @@
                 </div>
             </div>
 
-            <div class="right-panel">
+            <div class="right-panel">                <div id="timer-container" style="background: #1a1a1c; padding: 12px 15px; border-radius: 8px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <span style="font-weight: bold; color: #f1f1f1; font-size: 0.9em;">⏱️ Tiempo Restante:</span>
+                    <span id="countdown" style="font-family: monospace; font-size: 1.4em; color: #22c55e; font-weight: bold; letter-spacing: 1px;">--:--</span>
+                </div>
                 <h3>Tu Código (<%= reto.lenguaje %>)</h3>
                 <textarea id="codeEditor" class="code-area"><%= reto.codigo_inicial %></textarea>
                 
@@ -123,7 +126,52 @@
 
     <!-- Lógica de ejecución evaluador múltiple -->
     <script>
-        const retoId = <%= reto.id %>;
+        const retoId = <%= reto.id %>;        
+        // --- LOGICA DEL TEMPORIZADOR ---
+        const difText = "<%= reto.dificultad %>".toUpperCase();
+        let tiempoRestante = 600; // 10 minutos (Difícil por defecto)
+        
+        if (difText.includes('F')) {
+            tiempoRestante = 60; // 1 min (Fácil)
+        } else if (difText.includes('M')) {
+            tiempoRestante = 300; // 5 min (Medio)
+        }
+        
+        const countdownEl = document.getElementById('countdown');
+        const countInterval = setInterval(() => {
+            if (tiempoRestante <= 0) {
+                clearInterval(countInterval);
+                countdownEl.style.color = '#ef4444';
+                countdownEl.innerText = "00:00";
+                
+                // Bloquear UI
+                document.getElementById('codeEditor').disabled = true;
+                const runBtn = document.querySelector('.btn-run');
+                if (runBtn) { runBtn.disabled = true; runBtn.style.opacity = '0.5'; }
+                
+                // Mostrar alerta y redirigir
+                setTimeout(() => {
+                    alert('⏰ ¡Tiempo agotado! No pudiste resolver el reto a tiempo.');
+                    setTimeout(() => {
+                        window.location.href = '/retos';
+                    }, 3000);
+                }, 100);
+            } else {
+                const m = Math.floor(tiempoRestante / 60).toString().padStart(2, '0');
+                const s = (tiempoRestante % 60).toString().padStart(2, '0');
+                countdownEl.innerText = `${m}:${s}`;
+                
+                // Cambios de color warning y danger
+                if (tiempoRestante <= 15) {
+                    countdownEl.style.color = '#ef4444';
+                } else if (tiempoRestante <= 60) {
+                    countdownEl.style.color = '#eab308';
+                }
+                
+                tiempoRestante--;
+            }
+        }, 1000);
+        // --- FIN DEL TEMPORIZADOR ---
         // Inyectamos el string de código inicial original
         const rawInitialCode = <%- JSON.stringify(reto.codigo_inicial || '') %>;
         
