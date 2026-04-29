@@ -420,4 +420,5 @@ body.login-page, body.auth-page, .auth-wrapper {
   font-size: 18px;
   font-weight: 600;
   color: #f1f1f1;
-}
+
+.btn-google img { width: 20px !important; height: 20px !important; display: block !important; margin: 0 !important; flex-shrink: 0 !important; }

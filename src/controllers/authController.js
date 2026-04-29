@@ -1,5 +1,8 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
+const { OAuth2Client } = require('google-auth-library');
+const CLIENT_ID = '279698872477-rulqnl9i28p3jcgvfpfqfeucl56nglb1.apps.googleusercontent.com';
+const client = new OAuth2Client(CLIENT_ID);
 
 exports.getLogin = (req, res) => {
     res.render('auth/login');
@@ -14,16 +17,16 @@ exports.postLogin = async (req, res) => {
             // Compatible de forma retroactiva (encriptadas o texto plano)
             const isMatch = bcrypt.compareSync(password, user.password) || user.password === password;
             if (isMatch) {
-                // Guardamos datos en la sesión
+                // Guardamos datos en la sesi%%n
                 req.session.userId = user.id;
                 req.session.userName = user.nombre;
                 return res.redirect('/dashboard');
             }
         }
-        return res.send('Correo o contraseña incorrectos');
+        return res.send('Correo o contrase%�%a incorrectos');
     } catch (error) {
         console.error(error);
-        res.send('Error al intentar iniciar sesión');
+        res.send('Error al intentar iniciar sesi%%n');
     }
 };
 
@@ -36,10 +39,10 @@ exports.postRegister = async (req, res) => {
     try {
         const existingUser = await User.findByEmail(email);
         if (existingUser) {
-            return res.send('El correo ya está registrado en el sistema.');
+            return res.send('El correo ya est%� registrado en el sistema.');
         }
 
-        // Hasheamos la contraseña para mantener la seguridad
+        // Hasheamos la contrase%�%a para mantener la seguridad
         const hashedPassword = bcrypt.hashSync(password, 10);
         
         // Creamos el nuevo usuario
@@ -55,3 +58,33 @@ exports.postRegister = async (req, res) => {
         res.send('Error al intentar registrarse');
     }
 };
+
+exports.postGoogleLogin = async (req, res) => {
+    const { credential } = req.body;
+    if (!credential) {
+        return res.status(400).send('No credential received from Google.');
+    }
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const { email, name } = payload;
+        
+        let user = await User.findByEmail(email);
+        if (!user) {
+            const randomPassword = bcrypt.hashSync(Math.random().toString(36), 10);
+            const result = await User.create(name, email, randomPassword);
+            user = { id: result.insertId, nombre: name, email };
+        }
+        
+        req.session.userId = user.id;
+        req.session.userName = user.nombre;
+        return res.redirect('/dashboard');
+    } catch (error) {
+        console.error('Google Auth Error:', error);
+        return res.status(500).send('Error verificando la cuenta de Google. Revisa la consola para m%�s detalles.');
+    }
+};
+

@@ -4,21 +4,197 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Simulador de Exámenes</title>
-    <link rel="stylesheet" href="/css/style.css"> </head>
-<body>
-    <div class="auth-wrapper">
-        <div class="login-container">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="auth-page">
+    <style>
+        body.auth-page {
+            padding-left: 0 !important;
+            background: linear-gradient(135deg, rgba(30, 20, 45, 1) 0%, rgba(18, 18, 20, 1) 40%, rgba(10, 10, 10, 1) 100%) !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .glass-bg {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modern-glass {
+            background: #1a1a1c !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 12px !important;
+            padding: 48px 40px !important;
+            width: 100%;
+            max-width: 440px !important;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+            text-align: center;
+        }
+        .modern-glass h1 {
+            font-size: 26px !important;
+            font-weight: 700 !important;
+            font-family: Georgia, 'Times New Roman', Times, serif !important;
+            margin-bottom: 8px !important;
+            color: #fff !important;
+            letter-spacing: 0.5px;
+        }
+        .modern-glass p.subtitle {
+            color: #888 !important;
+            font-size: 14px !important;
+            margin-bottom: 32px !important;
+        }
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #e2e2e2;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        .btn-google:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .btn-google img {
+            width: 20px !important;
+            height: 20px !important;
+            display: block !important;
+            margin: 0 !important;
+            flex-shrink: 0 !important;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 32px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .divider span {
+            padding: 0 16px;
+        }
+        .input-modern input {
+            width: 100%;
+            padding: 16px 18px !important;
+            background: #141415 !important;
+            border: 1px solid #2a2a2c !important;
+            border-radius: 8px !important;
+            color: #fff !important;
+            font-size: 15px !important;
+            margin-bottom: 16px !important;
+            transition: all 0.2s !important;
+            box-sizing: border-box !important;
+        }
+        .input-modern input:focus {
+            outline: none !important;
+            border-color: rgba(99, 102, 241, 0.5) !important;
+            background: rgba(99, 102, 241, 0.02) !important;
+            box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.5) !important;
+        }
+        .btn-glow {
+            width: 100% !important;
+            padding: 16px !important;
+            border: none !important;
+            border-radius: 8px !important;
+            background: linear-gradient(90deg, #4c28bc 0%, #612dae 100%) !important;
+            color: white !important;
+            font-size: 16px !important;
+            font-weight: 500 !important;
+            cursor: pointer !important;
+            margin-top: 8px !important;
+            box-shadow: 0 4px 15px rgba(89, 40, 200, 0.4) !important;
+            transition: all 0.2s !important;
+            box-sizing: border-box;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 30px rgba(89, 40, 200, 0.6) !important;
+            transform: translateY(-2px) !important;
+            background: linear-gradient(90deg, #5c35d9 0%, #763ced 100%) !important;
+        }
+        .modern-glass .footer-text {
+            margin-top: 24px !important;
+            font-size: 13px !important;
+            color: #888 !important;
+        }
+        .link-glow {
+            color: #818cf8 !important;
+            text-decoration: none !important;
+            transition: text-shadow 0.2s !important;
+        }
+        .link-glow:hover {
+            text-shadow: 0 0 8px rgba(129, 140, 248, 0.6) !important;
+            color: #a5b4fc !important;
+        }
+    </style>
+    <div class="auth-wrapper glass-bg">
+        <div class="login-container modern-glass">
             <h1>Iniciar Sesión</h1>
-            <p>Entra para ver tus bancos de preguntas</p>
+            <p class="subtitle">Entra para ver tus bancos de preguntas</p>
             
+            <div id="g_id_onload"
+                 data-client_id="279698872477-rulqnl9i28p3jcgvfpfqfeucl56nglb1.apps.googleusercontent.com"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
+            </div>
+
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-shape="rectangular"
+                 data-theme="outline"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="center"
+                 data-width="400">
+            </div>
+
+            <form id="google-auth-form" action="/auth/google" method="POST" style="display: none;">
+                <input type="hidden" name="credential" id="google-credential">
+            </form>
+
+            <script>
+                function handleCredentialResponse(response) {
+                    const form = document.getElementById('google-auth-form');
+                    document.getElementById('google-credential').value = response.credential;
+                    form.submit();
+                }
+            </script>
+
+            <div class="divider">
+                <span>O</span>
+            </div>
+
             <form action="/login" method="POST">
-                <input type="email" name="email" placeholder="Correo electrónico" required>
-                <input type="password" name="password" placeholder="Contraseña" required>
-                <button type="submit">Entrar al Sistema</button>
+                <div class="input-modern">
+                    <input type="email" name="email" placeholder="Correo electrónico" required>
+                </div>
+                <div class="input-modern">
+                    <input type="password" name="password" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" class="btn-glow">Entrar al Sistema</button>
             </form>
 
             <div class="footer-text">
-                <p>¿No tienes una cuenta? <a href="/register">Regístrate gratis</a></p>
+                <p>¿No tienes una cuenta? <a href="/register" class="link-glow">Regístrate gratis</a></p>
             </div>
         </div>
     </div>

@@ -16,6 +16,8 @@ router.get('/', (req, res) => {
 router.get('/login', authController.getLogin);
 router.post('/login', authController.postLogin);
 
+router.post('/auth/google', authController.postGoogleLogin);
+
 router.get('/register', authController.getRegister);
 router.post('/register', authController.postRegister);
 

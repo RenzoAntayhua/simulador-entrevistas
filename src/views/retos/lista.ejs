@@ -10,15 +10,20 @@
             display: flex;
             gap: 15px;
             align-items: center;
-            background: #1e293b; border: 1px solid #334155; font-size: 16px; padding: 26px;
-            padding: 15px;
-            border-radius: 8px;
+            background: #0f0f0f; 
+            border: 1px solid #1c1c1c; 
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 20px;
         }
         .filter-select {
-            padding: 8px;
-            border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 16px; min-width: 180px;
-            border-radius: 4px;
+            padding: 8px 12px;
+            border: 1px solid #2a2a2a; 
+            background: #161616; 
+            color: #f1f1f1; 
+            font-size: 14px; 
+            min-width: 180px;
+            border-radius: 6px;
         }
         .reto-grid {
             display: grid;
@@ -31,21 +36,6 @@
         }
         @media (max-width: 600px) {
             .reto-grid { grid-template-columns: 1fr; }
-        }
-        .reto-card {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .reto-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         }
         
         .reto-header {
