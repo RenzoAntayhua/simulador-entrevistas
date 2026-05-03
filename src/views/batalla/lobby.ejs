@@ -17,12 +17,12 @@
                 <% if (salas && salas.length > 0) { %>
                     <div style="display: grid; gap: 15px;">
                         <% salas.forEach(s => { %>
-                            <div style="background: #1a1a2e; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2a2a4a;">
-                                <div>
+                            <div style="background: #1a1a2e; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2a2a4a; flex-wrap: wrap; gap: 15px;">
+                                <div style="flex: 1; min-width: 200px;">
                                     <strong style="font-size: 18px; color: #6366f1;">Reto: <%= s.reto_titulo %></strong>
                                     <p style="margin: 5px 0; color: #888;">Creador: <%= s.creador_nombre %> - Dificultad: <span class="badge badge-<%= s.dificultad.replace('í', 'i') %>"><%= s.dificultad %></span></p>
                                 </div>
-                                <a href="/batalla/<%= s.codigo %>" class="btn" style="background: #22c55e;">Unirse a Batalla</a>
+                                <a href="/batalla/<%= s.codigo %>" class="btn" style="background: #22c55e; white-space: nowrap;">Unirse a Batalla</a>
                             </div>
                         <% }) %>
                     </div>

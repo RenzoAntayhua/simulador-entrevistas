@@ -1,29 +1,143 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Simulador Ténico</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Registro - TechSim Solutions</title>
 </head>
-<body>
-    <div class="auth-wrapper">
-        <div class="login-container">
-            <img src="/img/logo.png" alt="Logo Simulador" style="width: 100px; height: auto; margin: 0 auto 15px auto; display: block; object-fit: contain;">
-            <h1 style="color: var(--primary);">Crear una cuenta</h1>
-            <p>Únete para crear y resolver simuladores</p>
+
+<body class="auth-page">
+    <style>
+        body.auth-page {
+            padding-left: 0 !important;
+            background: linear-gradient(135deg, rgba(30, 20, 45, 1) 0%, rgba(18, 18, 20, 1) 40%, rgba(10, 10, 10, 1) 100%) !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .glass-bg {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modern-glass {
+            background: #1a1a1c !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 12px !important;
+            padding: 48px 40px !important;
+            width: 100%;
+            max-width: 440px !important;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .modern-glass h1 {
+            font-size: 26px !important;
+            font-weight: 700 !important;
+            font-family: Georgia, 'Times New Roman', Times, serif !important;
+            margin-bottom: 8px !important;
+            color: #fff !important;
+            letter-spacing: 0.5px;
+        }
+
+        .modern-glass p.subtitle {
+            color: #888 !important;
+            font-size: 14px !important;
+            margin-bottom: 32px !important;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .input-group input:focus {
+            border-color: #6366f1;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: #6366f1;
+            color: #fff;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+        .footer-text {
+            margin-top: 24px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .footer-text a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 480px) {
+            .modern-glass { padding: 30px 20px !important; }
+        }
+    </style>
+
+    <div class="glass-bg">
+        <div class="modern-glass">
+            <img src="/img/logo.png" alt="TechSim Logo" style="width: 80px; margin-bottom: 20px; opacity: 0.9;">
+            <h1>Crea tu cuenta</h1>
+            <p class="subtitle">Únete para iniciar tus evaluaciones</p>
             
             <form action="/register" method="POST">
-                <input type="text" name="nombre" placeholder="Nombre completo" required>
-                <input type="email" name="email" placeholder="Correo electrónico" required>
-                <input type="password" name="password" placeholder="Contraseña" required>
-                <button type="submit" style="margin-top: 1rem;">Registrarme</button>
+                <div class="input-group">
+                    <input type="text" name="nombre" placeholder="Nombre completo" required>
+                </div>
+                <div class="input-group">
+                    <input type="email" name="email" placeholder="Correo electrónico" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" name="password" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" class="btn-primary">Registrarme</button>
             </form>
 
             <div class="footer-text">
-                <p>¿Ya tienes una cuenta? <a href="/login">Inicia sesión aquí</a></p>
+                ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
             </div>
         </div>
     </div>
 </body>
+
 </html>

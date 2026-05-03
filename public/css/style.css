@@ -449,8 +449,36 @@ body.login-page, body.auth-page, .auth-wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  height: calc(100vh - 80px);
+  height: calc(100vh - 140px);
   padding: 20px;
+}
+.batalla-panel {
+  background: #16161a;
+  border: 1px solid #2a2a35;
+  border-radius: 8px;
+  padding: 20px;
+  overflow-y: auto;
+}
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  height: 100%;
+}
+.console {
+  background: #000;
+  color: #22c55e;
+  padding: 15px;
+  border-radius: 8px;
+  height: 150px;
+  overflow-y: auto;
+  font-family: monospace;
+}
+.test-case-item {
+  background: #111;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
 }
 
 .contador-batalla {
