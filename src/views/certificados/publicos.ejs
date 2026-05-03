@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificados de <%= usuario.nombre %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body { padding: 40px 20px; text-align: center; background: #0a0a0a; color: white; font-family: sans-serif; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1000px; margin: 40px auto; }
+        .cert-card { background: linear-gradient(145deg, #16161a, #0d0d0f); border: 1px solid #6366f1; border-radius: 10px; padding: 25px; box-shadow: 0 0 15px rgba(99, 102, 241, 0.1); transition: transform 0.2s; }
+        .cert-card:hover { transform: translateY(-5px); box-shadow: 0 5px 20px rgba(99, 102, 241, 0.3); }
+    </style>
+</head>
+<body>
+    <img src="/img/logo.png" alt="TechSim Solutions" style="width: 150px; margin-bottom: 20px;">
+    <h2>Perfil Público de Certificaciones</h2>
+    <p style="color: #a1a1aa; font-size: 18px;">Ingeniero validado: <strong style="color: #22c55e;"><%= usuario.nombre %></strong></p>
+
+    <% if (certificados && certificados.length > 0) { %>
+        <div class="grid">
+            <% certificados.forEach(c => { %>
+                <div class="cert-card">
+                    <div style="font-size: 40px; margin-bottom: 10px;">🛡️</div>
+                    <h3 style="color: #6366f1; margin: 0 0 10px 0;">Certificado de Excelencia</h3>
+                    <p><strong>Reto Oficial:</strong> <%= c.reto_titulo %></p>
+                    <p style="color: #888; font-size: 14px;">Validación contra: <%= c.oponente_nombre %></p>
+                    <p style="font-size: 12px; color: #555; margin-top: 5px;">Código de Verificación: <%= c.sala_codigo %></p>
+                    <p style="font-size: 12px; color: #555; margin-top: 5px;">Acreditado el: <%= new Date(c.fecha).toLocaleDateString() %></p>
+                </div>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <div style="margin-top: 50px; background: #111; padding: 40px; border-radius: 10px; display: inline-block;">
+            <p style="color: #666; font-size: 18px;">Este usuario aún no cuenta con validaciones técnicas.</p>
+        </div>
+    <% } %>
+
+    <div style="margin-top: 50px;">
+        <p style="color: #555; margin-bottom: 15px;">Validado por la plataforma de TechSim Solutions</p>
+        <a href="/" class="btn" style="background: #2a2a35;">Únete a la plataforma</a>
+    </div>
+</body>
+</html>

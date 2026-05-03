@@ -206,3 +206,55 @@ tr:hover { background-color: #111; }
     font-size: 0.95rem;
     font-weight: 500;
 }
+
+/* =========================================================
+   RESPONSIVE / MOBILE ADMIN
+   ========================================================= */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+    .admin-sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        padding: 10px 0;
+        border-right: none;
+        border-bottom: 1px solid #1a1a1a;
+    }
+    .admin-sidebar ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+        padding: 0 10px;
+    }
+    .admin-sidebar a {
+        padding: 8px 12px;
+        font-size: 13px;
+        border-left: none !important;
+        border-radius: 4px;
+        text-align: center;
+    }
+    .admin-sidebar a.active, .admin-sidebar a:hover {
+        border-bottom: none;
+        background: rgba(99, 102, 241, 0.2);
+    }
+    .admin-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 15px;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    /* Hacer las tablas scrolleables horizontalmente */
+    .admin-content > div, .admin-content > form > div, .admin-content > table {
+        max-width: 100%;
+        overflow-x: auto;
+        display: block;
+    }
+    table {
+        min-width: 600px;
+    }
+}

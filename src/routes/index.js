@@ -857,13 +857,110 @@ router.get('/certificados', async (req, res) => {
     try {
         const db = require('../config/db');
         const [certificados] = await db.execute('SELECT * FROM certificados WHERE usuario_id = ? ORDER BY fecha DESC', [req.session.userId]);
-        res.render('certificados/lista', { certificados });
+        res.render('certificados/lista', { certificados, userId: req.session.userId });
     } catch (e) {
         console.error(e);
         res.status(500).send('Error');
     }
 });
 
+// Función auxiliar para generar el PDF (sin el logo, como se solicitó)
+async function generarPDF(cert, ganador_nombre, res) {
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({ layout: 'landscape', size: 'A4', margins: { top: 0, bottom: 0, left: 0, right: 0 } });
+    
+    res.setHeader('Content-disposition', 'inline; filename="certificado-'+cert.sala_codigo+'.pdf"');
+    res.setHeader('Content-type', 'application/pdf');
+    doc.pipe(res);
+
+    // Fondo blanco
+    doc.rect(0, 0, doc.page.width, doc.page.height).fill('#ffffff');
+    
+    // Borde exterior e interior (claros)
+    doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).lineWidth(3).strokeColor('#cbd5e1').stroke();
+    doc.rect(26, 26, doc.page.width - 52, doc.page.height - 52).lineWidth(1).strokeColor('#6366f1').stroke();
+
+    // Marca de agua central (Logo sin fondo difuminado)
+    const watermarkPath = require('path').join(__dirname, '../../public/img/logo_sin_fondo.png');
+    if (require('fs').existsSync(watermarkPath)) {
+        doc.save();
+        doc.opacity(0.12);
+        doc.image(watermarkPath, (doc.page.width - 500) / 2, (doc.page.height - 500) / 2, { fit: [500, 500], align: 'center', valign: 'center' });
+        doc.restore();
+    }
+
+    // Título principal centrado (ajustado Y=100 al no haber logo)
+    doc.y = 100;
+    doc.fontSize(32).fillColor('#0f172a').text('CERTIFICADO DE EXCELENCIA TÉCNICA', { align: 'center', characterSpacing: 2 });
+    
+    doc.moveDown(1);
+    doc.fontSize(13).fillColor('#64748b').text('El comité de evaluación de TechSim Solutions, respaldado por especialistas del sector,', { align: 'center' });
+    doc.fontSize(13).fillColor('#64748b').text('otorga la presente validación de competencias técnicas a:', { align: 'center' });
+    
+    doc.moveDown(1.5);
+    doc.fontSize(34).fillColor('#16a34a').text(ganador_nombre.toUpperCase(), { align: 'center' });
+    
+    // Línea divisoria
+    doc.moveTo(doc.page.width / 2 - 220, doc.y + 20)
+       .lineTo(doc.page.width / 2 + 220, doc.y + 20)
+       .lineWidth(1.5).strokeColor('#94a3b8').stroke();
+
+    doc.moveDown(2.5);
+    doc.fontSize(14).fillColor('#475569').text('Por haber acreditado habilidades excepcionales de ingeniería y lógica, superando la evaluación técnica contra:', { align: 'center' });
+    doc.moveDown(0.5);
+    doc.fontSize(22).fillColor('#dc2626').text(cert.oponente_nombre, { align: 'center' });
+    doc.moveDown(0.5);
+    doc.fontSize(14).fillColor('#475569').text('en el escenario de prueba oficial:', { align: 'center' });
+    
+    doc.moveDown(1);
+    doc.fontSize(26).fillColor('#4f46e5').text(cert.reto_titulo, { align: 'center' });
+    
+    // Zona de firmas y sellos
+    const startY = doc.page.height - 110;
+    
+    // Firma izquierda
+    const firma1Path = require('path').join(__dirname, '../../public/img/firma1.png');
+    if (require('fs').existsSync(firma1Path)) {
+        doc.image(firma1Path, 80, startY - 45, { fit: [200, 60], align: 'center', valign: 'bottom' });
+    }
+    doc.moveTo(80, startY + 15).lineTo(280, startY + 15).lineWidth(1).strokeColor('#94a3b8').stroke();
+    doc.fontSize(10).fillColor('#64748b').text('DIRECTOR DE EVALUACIÓN TÉCNICA', 80, startY + 25, { width: 200, align: 'center' });
+    doc.fillColor('#334155').text('TechSim Solutions', 80, startY + 40, { width: 200, align: 'center' });
+    
+    // Firma derecha
+    const firma2Path = require('path').join(__dirname, '../../public/img/firma2.png');
+    if (require('fs').existsSync(firma2Path)) {
+        doc.image(firma2Path, doc.page.width - 280, startY - 45, { fit: [200, 60], align: 'center', valign: 'bottom' });
+    }
+    doc.moveTo(doc.page.width - 280, startY + 15).lineTo(doc.page.width - 80, startY + 15).lineWidth(1).strokeColor('#94a3b8').stroke();
+    doc.fontSize(10).fillColor('#64748b').text('VALIDACIÓN DEL SISTEMA', doc.page.width - 280, startY + 25, { width: 200, align: 'center' });
+    doc.fillColor('#334155').text(`Código: ${cert.sala_codigo} | Fecha: ${new Date(cert.fecha).toLocaleDateString()}`, doc.page.width - 280, startY + 40, { width: 200, align: 'center' });
+
+    // Sello central "VERIFIED"
+    doc.save();
+    doc.translate(doc.page.width / 2, startY + 20);
+    doc.rotate(-15);
+    doc.fontSize(28).fillOpacity(0.1).fillColor('#16a34a').text('VERIFIED', -70, -15);
+    doc.restore();
+
+    doc.end();
+}
+
+// Ruta pública de UN SOLO certificado (Renderiza el PDF directo en el navegador)
+router.get('/c/:id', async (req, res) => {
+    try {
+        const db = require('../config/db');
+        const [[cert]] = await db.execute('SELECT c.*, u.nombre as ganador_nombre FROM certificados c JOIN usuarios u ON c.usuario_id = u.id WHERE c.id = ?', [req.params.id]);
+        if (!cert) return res.status(404).send('Certificado no encontrado');
+        
+        await generarPDF(cert, cert.ganador_nombre, res);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error al generar el certificado público');
+    }
+});
+
+// Ruta privada original (descargar PDF desde la cuenta)
 router.get('/certificados/:id/pdf', async (req, res) => {
     if (!req.session.userId) return res.redirect('/login');
     try {
@@ -873,33 +970,7 @@ router.get('/certificados/:id/pdf', async (req, res) => {
 
         const [[user]] = await db.execute('SELECT nombre FROM usuarios WHERE id = ?', [req.session.userId]);
 
-        const PDFDocument = require('pdfkit');
-        const doc = new PDFDocument({ layout: 'landscape', size: 'A4' });
-        
-        res.setHeader('Content-disposition', 'attachment; filename="certificado-'+cert.sala_codigo+'.pdf"');
-        res.setHeader('Content-type', 'application/pdf');
-        doc.pipe(res);
-
-        // Borde dorado
-        doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).lineWidth(10).strokeColor('#ffd700').stroke();
-        
-        doc.moveDown(4);
-        doc.fontSize(40).fillColor('#2c3e50').text('CERTIFICADO DE VICTORIA', { align: 'center' });
-        doc.moveDown(1);
-        doc.fontSize(20).fillColor('#333').text('Otorgado a:', { align: 'center' });
-        doc.moveDown(1);
-        doc.fontSize(30).fillColor('#6366f1').text(user.nombre.toUpperCase(), { align: 'center' });
-        doc.moveDown(1);
-        doc.fontSize(16).fillColor('#333').text('Por haber derrotado a ', { align: 'center', continued: true })
-           .fillColor('#e74c3c').text(cert.oponente_nombre, { continued: true })
-           .fillColor('#333').text(' en el reto:');
-        doc.moveDown(1);
-        doc.fontSize(24).fillColor('#22c55e').text(cert.reto_titulo, { align: 'center' });
-        doc.moveDown(2);
-        doc.fontSize(14).fillColor('#888').text('Fecha: ' + new Date(cert.fecha).toLocaleDateString(), { align: 'center' });
-        doc.fontSize(12).text('Código de sala: ' + cert.sala_codigo, { align: 'center' });
-
-        doc.end();
+        await generarPDF(cert, user.nombre, res);
     } catch (e) {
         console.error(e);
         res.status(500).send('Error generando PDF de certificado');
