@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Retos - Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <%- include('partials/sidebar') %>
+    <main class="admin-content">
+        <h1>Gestion de Retos</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>TÃ­tulo</th>
+                    <th>Dificultad</th>
+                    <th>AcciÃ³n</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% retos.forEach(r => { %>
+                <tr>
+                    <td><%= r.id %></td>
+                    <td><%= r.titulo %></td>
+                    <td><%= r.dificultad %></td>
+                    <td>
+                        <form action="/admin/retos/<%= r.id %>/delete" method="POST" onsubmit="return confirm('Â¿Seguro que deseas eliminar este reto?');">
+                            <button class="btn-danger" type="submit">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Batalla: <%= reto.titulo %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    
+    <div class="batalla-banner">
+        <span><%= userName %> (Tú)</span>
+        <span class="batalla-vs">VS</span>
+        <span id="oponente-nombre">
+            <% if (sala.creador_id !== userId) { %>
+                <%= sala.creador_nombre %>
+            <% } else { %>
+                Esperando oponente...
+            <% } %>
+        </span>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
+            <span id="estado-oponente" class="estado-oponente-badge">Esperando</span>
+            <div id="countdown" class="contador-batalla">--:--</div>
+            <% if (sala.creador_id === userId) { %>
+                <form action="/batalla/cancelar" method="POST" id="formCancelar" style="margin: 0;">
+                    <input type="hidden" name="codigo" value="<%= sala.codigo %>">
+                    <button type="submit" class="btn" style="background: #ef4444; padding: 6px 12px; font-size: 14px;">Cancelar</button>
+                </form>
+            <% } %>
+        </div>
+    </div>
+
+    <div id="overlay-resultado" class="overlay-resultado" style="display: none;">
+        <div style="text-align: center; background: #111; padding: 40px; border-radius: 12px; border: 1px solid #333;">
+            <h1 id="resultado-texto" style="font-size: 48px; margin-bottom: 20px;"></h1>
+            <a href="/batalla" class="btn" style="font-size: 18px;">Volver al Lobby</a>
+            <a href="/certificados" class="btn" id="btn-certificado" style="font-size: 18px; display: none; background: #eab308; color: black; margin-left: 10px;">Ver Certificado</a>
+        </div>
+    </div>
+
+    <div class="batalla-layout" style="padding: 20px; display: flex; gap: 20px; height: calc(100vh - 140px);">
+        <div style="flex: 1; background: #16161a; border: 1px solid #2a2a35; border-radius: 8px; padding: 20px; overflow-y: auto;">
+            <h2><%= reto.titulo %></h2>
+            <p style="font-size: 16px; color: #ccc;"><%= reto.enunciado %></p>
+            <hr style="border-color: #333; margin: 20px 0;">
+            <h3>Casos de Prueba</h3>
+            <div class="test-cases-list">
+                <% if(casosPrueba && casosPrueba.length > 0) { %>
+                    <% casosPrueba.filter(c => c.es_visible).forEach((test, idx) => { %>
+                        <div class="test-case-item" style="background: #111; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                            <strong>Input:</strong> <code style="color: #6366f1;"><%= test.input %></code><br>
+                            <strong>Output Esperado:</strong> <code style="color: #22c55e;"><%= test.output_esperado %></code>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+        </div>
+        
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+            <textarea id="codeEditor" class="code-area" style="flex: 1; font-family: monospace; font-size: 16px; padding: 15px; background: #0a0a0a; color: #fff; border: 1px solid #333; border-radius: 8px; resize: none;"><%= reto.codigo_inicial %></textarea>
+            <button class="btn" style="background: #6366f1; padding: 15px; font-size: 16px;" onclick="runCode()" id="btnRun" disabled>Esperando inicio...</button>
+            <div id="consoleOutput" class="console" style="background: #000; color: #22c55e; padding: 15px; border-radius: 8px; height: 150px; overflow-y: auto; font-family: monospace;">>_ Esperando ejecución...</div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const codigo = '<%= sala.codigo %>';
+        const usuario = { id: <%= userId %>, nombre: '<%= userName %>' };
+        let oponente = null;
+        let batallaActiva = false;
+        
+        socket.emit('unirse-sala', { codigo, usuario });
+        <% if (typeof invitado !== 'undefined' && invitado) { %>
+            socket.emit('invitar-amigo', { amigo_id: <%= invitado %>, codigo, reto: '<%= reto.titulo %>' });
+        <% } %>
+        
+        socket.on('actualizar-sala', (jugadores) => {
+            const op = jugadores.find(j => j.id !== usuario.id);
+            if (op) {
+                oponente = op;
+                document.getElementById('oponente-nombre').textContent = op.nombre;
+                document.getElementById('estado-oponente').textContent = 'Conectado';
+                const formC = document.getElementById('formCancelar');
+                if (formC) formC.style.display = 'none';
+            }
+        });
+        
+        socket.on('oponente-rechazo', () => {
+            alert('El oponente ha rechazado tu desafío.');
+            document.getElementById('estado-oponente').textContent = 'Rechazado';
+            document.getElementById('estado-oponente').style.color = '#ef4444';
+        });
+        
+        socket.on('sala-lista', () => {
+            if (!batallaActiva) {
+                batallaActiva = true;
+                document.getElementById('btnRun').disabled = false;
+                document.getElementById('btnRun').textContent = '▶ Ejecutar y Enviar';
+                iniciarContador();
+            }
+        });
+        
+        socket.on('oponente-evaluando', () => {
+            document.getElementById('estado-oponente').textContent = '⏳ Evaluando...';
+            setTimeout(() => { 
+                if (batallaActiva) document.getElementById('estado-oponente').textContent = 'Conectado'; 
+            }, 5000);
+        });
+        
+        socket.on('reto-ganado', ({ ganador, perdedor, porDesconexion }) => {
+            batallaActiva = false;
+            document.getElementById('btnRun').disabled = true;
+            
+            const overlay = document.getElementById('overlay-resultado');
+            const texto = document.getElementById('resultado-texto');
+            overlay.style.display = 'flex';
+            
+            if (ganador.id === usuario.id) {
+                texto.textContent = porDesconexion ? '🏆 ¡GANASTE! (Abandono)' : '🏆 ¡GANASTE!';
+                texto.style.color = '#22c55e';
+                document.getElementById('btn-certificado').style.display = 'inline-block';
+            } else {
+                texto.textContent = '😔 Perdiste';
+                texto.style.color = '#ef4444';
+            }
+        });
+
+        function iniciarContador() {
+            let tiempo = <%= reto.dificultad === 'Fácil' ? 300 : (reto.dificultad === 'Medio' ? 600 : 900) %>;
+            const el = document.getElementById('countdown');
+            const interval = setInterval(() => {
+                if (!batallaActiva) return clearInterval(interval);
+                if (tiempo <= 0) {
+                    clearInterval(interval);
+                    onTiempoAgotado();
+                    return;
+                }
+                const m = Math.floor(tiempo / 60).toString().padStart(2, '0');
+                const s = (tiempo % 60).toString().padStart(2, '0');
+                el.textContent = `${m}:${s}`;
+                if (tiempo < 60) el.style.color = '#ef4444';
+                tiempo--;
+            }, 1000);
+        }
+        
+        function onTiempoAgotado() {
+            alert('¡Tiempo Agotado!');
+            window.location.href = '/batalla';
+        }
+
+        function onRetoCompletado() {
+            socket.emit('reto-completado', { codigo, ganador: usuario, perdedor: oponente, retoTitulo: '<%= reto.titulo %>' });
+        }
+
+        async function runCode() {
+            if (!batallaActiva) return;
+            const code = document.getElementById('codeEditor').value;
+            const consoleDiv = document.getElementById('consoleOutput');
+            const btnRun = document.getElementById('btnRun');
+            
+            socket.emit('evaluando-codigo', { codigo });
+            consoleDiv.innerHTML = ">_ Evaluando código...\n";
+            btnRun.disabled = true;
+            
+            const testsToRun = <%- JSON.stringify(casosPrueba || []) %>;
+            let allTestsPassed = true;
+            
+            const lenguajeNombre = "<%= reto.lenguaje %>";
+            const lenguajesIds = {
+                "JavaScript": 63, "Python": 71, "Java": 62, "C++": 54, "C#": 51
+            };
+            const language_id = lenguajesIds[lenguajeNombre] || 63;
+            
+            try {
+                for (const test of testsToRun) {
+                    let source_code = code;
+                    
+                    if (language_id === 62) { // Java
+                        source_code = `import java.util.Scanner;\npublic class Main {\n${code}\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if(scanner.hasNextLine()){\n            String input = scanner.nextLine();\n            System.out.println(solucion(input));\n        }\n    }\n}`;
+                    } else if (language_id === 71) { // Python
+                        source_code = `${code}\nimport sys\nimport ast\ntry:\n    args = ast.literal_eval('[' + sys.stdin.read().strip() + ']')\nexcept:\n    args = eval('[' + sys.stdin.read().strip().replace('true', 'True').replace('false', 'False') + ']')\nprint(solucion(*args))`;
+                    } else if (language_id === 63) { // JavaScript
+                        source_code = `${code}\nconst fs = require('fs');\nconst input = fs.readFileSync(0, 'utf-8').trim();\nlet args;\ntry { args = eval('[' + input + ']'); } catch(e) { args = [input]; }\nconsole.log(solucion(...args));`;
+                    } else if (language_id === 54) { // C++
+                        source_code = `#include <iostream>\nusing namespace std;\n${source_code}\nint main() {\n    int n;\n    cin >> n;\n    cout << (solucion(n) ? "true" : "false") << endl;\n    return 0;\n}`;
+                    }
+                    
+                    const response = await fetch('https://ce.judge0.com/submissions?wait=true', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ source_code, language_id, stdin: test.input })
+                    });
+                    const data = await response.json();
+                    
+                    if (!data || data.status.id !== 3) {
+                        allTestsPassed = false;
+                        let errStr = data.compile_output || data.stderr || data.status.description;
+                        consoleDiv.innerHTML += `❌ Error o test fallido en ejecución: ${errStr}\n`;
+                        break;
+                    }
+                    
+                    let stdoutClear = (data.stdout || '').replace(/\\/g, '').replace(/"/g, '').trim();
+                    let expectedClear = (test.output_esperado || '').replace(/\\/g, '').replace(/"/g, '').trim();
+                    if (stdoutClear !== expectedClear) {
+                        allTestsPassed = false;
+                        consoleDiv.innerHTML += `❌ Test falló: Esperado ${expectedClear}, Obtenido ${stdoutClear}\n`;
+                        break;
+                    }
+                }
+                
+                if (allTestsPassed) {
+                    consoleDiv.innerHTML += `\n🎉 ¡CÓDIGO CORRECTO! Declarando victoria...\n`;
+                    onRetoCompletado();
+                } else {
+                    consoleDiv.innerHTML += `\n⚠️ Sigue intentándolo.\n`;
+                }
+            } catch(e) {
+                consoleDiv.innerHTML += `❌ Error de conexión al evaluar.\n`;
+            }
+            btnRun.disabled = false;
+        }
+    </script>
+</body>
+</html>

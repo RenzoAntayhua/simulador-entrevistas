@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <%- include('partials/sidebar') %>
+    <main class="admin-content">
+        <h1>Dashboard General</h1>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Usuarios</h3>
+                <p class="stat-number"><%= stats.usuarios %></p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Retos</h3>
+                <p class="stat-number"><%= stats.retos %></p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Bancos</h3>
+                <p class="stat-number"><%= stats.bancos %></p>
+            </div>
+            <div class="stat-card">
+                <h3>Intentos Exitosos</h3>
+                <p class="stat-number"><%= stats.intentos %></p>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; display: flex; gap: 20px;">
+            <div style="flex: 1;">
+                <h2>Top 5 Usuarios Mas Activos</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Total Intentos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% topUsuarios.forEach(u => { %>
+                        <tr>
+                            <td><%= u.nombre %></td>
+                            <td><%= u.total %></td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <div style="flex: 1;">
+                <h2>Retos Mas Intentados</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reto</th>
+                            <th>Total Intentos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% topRetos.forEach(r => { %>
+                        <tr>
+                            <td><%= r.titulo %></td>
+                            <td><%= r.total %></td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="live-users-section">
+            <div class="live-header">
+                <h2>Usuarios Conectados (Tiempo Real)</h2>
+                <div class="live-count-badge">
+                    <span class="live-dot"></span>
+                    <span id="live-count">0</span> Activos
+                </div>
+            </div>
+            <div id="lista-conectados" class="live-users-grid">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const socket = io();
+        socket.emit('usuario-conectado', { nombre: '<%= typeof userName !== "undefined" && userName ? userName : "Administrador" %>' });
+        socket.emit('solicitar-conectados');
+
+
+        socket.on('actualizar-conectados', (usuarios) => {
+            const countEl = document.getElementById('live-count');
+            if (countEl) countEl.textContent = usuarios.length;
+
+            const contenedor = document.getElementById('lista-conectados');
+            contenedor.innerHTML = '';
+            
+            usuarios.forEach(u => {
+                // Generar iniciales (ej: Diego Castillo -> DC)
+                const nameParts = u.nombre.trim().split(' ');
+                let initials = 'U';
+                if (nameParts.length > 1) {
+                    initials = nameParts[0][0] + nameParts[1][0];
+                } else if (nameParts[0].length > 1) {
+                    initials = nameParts[0].substring(0, 2);
+                } else if (nameParts[0].length === 1) {
+                    initials = nameParts[0];
+                }
+                
+                const card = document.createElement('div');
+                card.className = 'live-user-card';
+                card.innerHTML = `
+                    <div class="avatar-circle">
+                        ${initials.toUpperCase()}
+                        <div class="status-pulse"></div>
+                    </div>
+                    <span class="user-name">${u.nombre}</span>
+                `;
+                contenedor.appendChild(card);
+            });
+        });
+    </script>
+</body>
+</html>

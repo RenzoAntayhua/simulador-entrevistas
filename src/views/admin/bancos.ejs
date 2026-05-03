@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bancos - Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <%- include('partials/sidebar') %>
+    <main class="admin-content">
+        <h1>Gestion de Bancos</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>TÃ­tulo</th>
+                    <th>CategorÃ­a</th>
+                    <th>Autor ID</th>
+                    <th>AcciÃ³n</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% bancos.forEach(b => { %>
+                <tr>
+                    <td><%= b.id %></td>
+                    <td><%= b.titulo %></td>
+                    <td><%= b.categoria %></td>
+                    <td><%= b.autor_id %></td>
+                    <td>
+                        <form action="/admin/bancos/<%= b.id %>/delete" method="POST" onsubmit="return confirm('Â¿Seguro que deseas eliminar este banco?');">
+                            <button class="btn-danger" type="submit">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Amigos - Simulador</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .solicitudes-list, .amigos-list { margin-bottom: 40px; }
+        .amigo-item { background: #16161a; padding: 15px; border-radius: 8px; border: 1px solid #2a2a35; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .amigo-info { display: flex; align-items: center; gap: 15px; }
+        .amigo-avatar { width: 40px; height: 40px; border-radius: 50%; background: #22c55e; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; }
+        .btn-group { display: flex; gap: 10px; }
+        .btn-aceptar { background: #22c55e; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-rechazar { background: #ef4444; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
+        .dot-online { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; display: none; margin-left: 10px; box-shadow: 0 0 5px #22c55e; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: #16161a; padding: 20px; border-radius: 8px; width: 400px; border: 1px solid #333; }
+    </style>
+</head>
+<body>
+    <%- include('../partials/header') %>
+    <div class="container">
+        <h2>👫 Lista de Amigos</h2>
+
+        <% if (solicitudes.length > 0) { %>
+            <div class="solicitudes-list">
+                <h3 style="color: #f59e0b;">Solicitudes Recibidas (<%= solicitudes.length %>)</h3>
+                <% solicitudes.forEach(s => { %>
+                    <div class="amigo-item" style="border-color: #f59e0b;">
+                        <div class="amigo-info">
+                            <div class="amigo-avatar" style="background: #f59e0b;"><%= s.nombre.charAt(0) %></div>
+                            <strong><%= s.nombre %></strong> quiere ser tu amigo
+                        </div>
+                        <div class="btn-group">
+                            <form action="/amigos/aceptar/<%= s.relacion_id %>" method="POST">
+                                <button type="submit" class="btn-aceptar">Aceptar</button>
+                            </form>
+                            <form action="/amigos/rechazar/<%= s.relacion_id %>" method="POST">
+                                <button type="submit" class="btn-rechazar">Rechazar</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+
+        <div class="amigos-list">
+            <h3>Tus Amigos</h3>
+            <% if (amigos.length > 0) { %>
+                <% amigos.forEach(a => { %>
+                    <div class="amigo-item">
+                        <div class="amigo-info">
+                            <div class="amigo-avatar"><%= a.nombre.charAt(0) %></div>
+                            <strong><%= a.nombre %></strong>
+                            <div id="dot-<%= a.id %>" class="dot-online" title="En línea"></div>
+                        </div>
+                        <div>
+                            <button onclick="abrirModalReto(<%= a.id %>, '<%= a.nombre %>')" class="btn" style="background: #eab308; color: black; font-weight: bold;">⚔️ Retar</button>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>Aún no tienes amigos agregados. ¡<a href="/usuarios" style="color:#6366f1;">Ve a conocer gente!</a></p>
+            <% } %>
+        </div>
+    </div>
+    </div>
+
+    <!-- Modal Reto -->
+    <div id="modalReto" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 15px;">Retar a <span id="nombreAmigoReto" style="color: #6366f1;"></span></h3>
+            <form action="/batalla/crear-privada" method="POST">
+                <input type="hidden" name="amigo_id" id="inputAmigoId">
+                <label>Selecciona un reto:</label>
+                <select name="reto_id" class="input" style="width:100%; margin-top:10px; margin-bottom:20px;" required>
+                    <option value="">-- Elige --</option>
+                    <% if (typeof retos !== 'undefined') { retos.forEach(r => { %>
+                        <option value="<%= r.id %>"><%= r.titulo %> (<%= r.dificultad %>)</option>
+                    <% }) } %>
+                </select>
+                <div style="display:flex; gap:10px;">
+                    <button type="submit" class="btn" style="flex:1;">Enviar Desafío</button>
+                    <button type="button" class="btn-secondary" onclick="cerrarModal()" style="flex:1;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalReto(id, nombre) {
+            document.getElementById('inputAmigoId').value = id;
+            document.getElementById('nombreAmigoReto').textContent = nombre;
+            document.getElementById('modalReto').style.display = 'flex';
+        }
+        function cerrarModal() {
+            document.getElementById('modalReto').style.display = 'none';
+        }
+
+        if (typeof globalSocket !== 'undefined') {
+            globalSocket.on('actualizar-conectados', (usuarios) => {
+                document.querySelectorAll('.dot-online').forEach(el => el.style.display = 'none');
+                usuarios.forEach(u => {
+                    const dot = document.getElementById('dot-' + u.id);
+                    if (dot) dot.style.display = 'block';
+                });
+            });
+            globalSocket.emit('solicitar-conectados');
+        }
+    </script>
+</body>
+</html>

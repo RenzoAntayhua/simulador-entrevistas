@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lobby de Batallas - Simulador</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 30px;">⚔️ Lobby de Batallas 1v1</h2>
+        
+        <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+            <div style="flex: 2; min-width: 300px;">
+                <h3>Salas Esperando Oponente</h3>
+                <% if (salas && salas.length > 0) { %>
+                    <div style="display: grid; gap: 15px;">
+                        <% salas.forEach(s => { %>
+                            <div style="background: #1a1a2e; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2a2a4a;">
+                                <div>
+                                    <strong style="font-size: 18px; color: #6366f1;">Reto: <%= s.reto_titulo %></strong>
+                                    <p style="margin: 5px 0; color: #888;">Creador: <%= s.creador_nombre %> - Dificultad: <span class="badge badge-<%= s.dificultad.replace('í', 'i') %>"><%= s.dificultad %></span></p>
+                                </div>
+                                <a href="/batalla/<%= s.codigo %>" class="btn" style="background: #22c55e;">Unirse a Batalla</a>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div style="background: #111; padding: 30px; text-align: center; border-radius: 8px;">
+                        <p>No hay salas activas esperando oponente. ¡Crea la tuya!</p>
+                    </div>
+                <% } %>
+            </div>
+            
+            <div style="flex: 1; min-width: 300px; background: #16161a; padding: 20px; border-radius: 8px; height: fit-content; border: 1px solid #2a2a35;">
+                <h3>Crear Sala de Batalla</h3>
+                <form action="/batalla/crear" method="POST">
+                    <label style="display: block; margin-bottom: 10px;">Selecciona un Reto:</label>
+                    <select name="reto_id" class="input" style="margin-bottom: 20px; width: 100%;" required>
+                        <option value="">-- Elige un reto --</option>
+                        <% retos.forEach(r => { %>
+                            <option value="<%= r.id %>"><%= r.titulo %> (<%= r.dificultad %>)</option>
+                        <% }) %>
+                    </select>
+                    <button type="submit" class="btn" style="width: 100%;">Crear Sala</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

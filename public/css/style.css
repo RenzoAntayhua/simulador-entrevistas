@@ -28,6 +28,7 @@ nav, header, .navbar {
   z-index: 100;
   box-shadow: 4px 0 20px rgba(0,0,0,0.5);
   height: 100vh;
+  overflow-y: auto;
 }
 
 body {
@@ -420,5 +421,173 @@ body.login-page, body.auth-page, .auth-wrapper {
   font-size: 18px;
   font-weight: 600;
   color: #f1f1f1;
+}
 
 .btn-google img { width: 20px !important; height: 20px !important; display: block !important; margin: 0 !important; flex-shrink: 0 !important; }
+
+/* =========================================================
+   4. BATALLA 1v1
+   ========================================================= */
+.batalla-banner {
+  display: flex;
+  align-items: center;
+  background: #0f0f0f;
+  border-bottom: 1px solid #1c1c1c;
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.batalla-vs {
+  color: #6366f1;
+  margin: 0 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.batalla-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  height: calc(100vh - 80px);
+  padding: 20px;
+}
+
+.contador-batalla {
+  font-size: 48px;
+  font-weight: 700;
+  color: #22c55e;
+  font-variant-numeric: tabular-nums;
+}
+
+.overlay-resultado {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  flex-direction: column;
+}
+
+.estado-oponente-badge {
+  background: #1a1a2e;
+  color: #818cf8;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #2d2d5e;
+}
+
+/* =========================================================
+   5. RESPONSIVE / MOBILE
+   ========================================================= */
+@media (max-width: 768px) {
+  /* Sidebar */
+  nav, header, .navbar {
+    position: static;
+    width: 100%;
+    height: auto;
+    padding: 15px;
+    border-right: none;
+    border-bottom: 1px solid #1c1c1c;
+    overflow-y: visible;
+  }
+  
+  body {
+    padding-left: 0;
+  }
+  
+  nav div:last-child {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  nav a {
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-top: 0 !important;
+  }
+  
+  nav div:first-child {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  /* Containers & Padding */
+  .container, main, .main-content {
+    padding: 20px 15px;
+  }
+  
+  /* Grids */
+  .grid, .cards-grid, .bancos-grid, .retos-grid, .grid-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Modal */
+  .modal-content {
+    width: 90% !important;
+    padding: 15px !important;
+  }
+  
+  /* Batalla Sala */
+  .batalla-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .batalla-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    padding: 15px;
+  }
+  
+  .batalla-banner > div {
+    margin-left: 0 !important;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .contador-batalla {
+    font-size: 32px;
+  }
+  
+  .batalla-vs {
+    margin: 5px 0;
+  }
+  
+  /* Amigos Lista */
+  .amigo-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .amigo-item > div:last-child {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  /* Overlay */
+  #resultado-texto {
+    font-size: 32px !important;
+  }
+  
+  /* Retos y Botones */
+  .filtros-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filtros-bar select {
+    max-width: 100%;
+  }
+}

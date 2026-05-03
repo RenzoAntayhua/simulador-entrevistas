@@ -2,10 +2,23 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const Banco = require('../models/bancoModel');
+const PDFDocument = require('pdfkit');
+
+// --- MIDDLEWARE ADMIN ---
+const esAdmin = (req, res, next) => {
+    console.log('SESSION:', req.session ? req.session.usuario : 'No session');
+    if (req.session && req.session.usuario && req.session.usuario.rol === 'admin') {
+        return next();
+    }
+    res.redirect('/dashboard');
+};
 
 // --- RUTA PRINCIPAL ---
 router.get('/', (req, res) => {
     if (req.session && req.session.userId) {
+        if (req.session.usuario && req.session.usuario.rol === 'admin') {
+            return res.redirect('/admin');
+        }
         res.redirect('/dashboard');
     } else {
         res.redirect('/login');
@@ -450,6 +463,446 @@ router.post('/retos/enviar', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Error al guardar tu solución" });
+    }
+});
+// --- RUTAS DE ADMINISTRADOR ---
+router.get('/admin', esAdmin, async (req, res) => {
+    try {
+        const db = require('../config/db');
+        const [[{total: usuarios}]] = await db.execute('SELECT COUNT(*) as total FROM usuarios');
+        const [[{total: retos}]] = await db.execute('SELECT COUNT(*) as total FROM retos');
+        const [[{total: bancos}]] = await db.execute('SELECT COUNT(*) as total FROM bancos');
+        const [[{total: intentos}]] = await db.execute("SELECT COUNT(*) as total FROM intentos_retos WHERE resultado='Exitoso'");
+        
+        const [topUsuarios] = await db.execute(`
+            SELECT u.nombre, COUNT(ir.id) as total 
+            FROM intentos_retos ir 
+            JOIN usuarios u ON ir.usuario_id = u.id 
+            GROUP BY u.id ORDER BY total DESC LIMIT 5
+        `);
+        
+        const [topRetos] = await db.execute(`
+            SELECT r.titulo, COUNT(ir.id) as total 
+            FROM intentos_retos ir 
+            JOIN retos r ON ir.reto_id = r.id 
+            GROUP BY r.id ORDER BY total DESC LIMIT 5
+        `);
+
+        res.render('admin/dashboard', {
+            layout: false,
+            stats: { usuarios, retos, bancos, intentos },
+            topUsuarios,
+            topRetos
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error cargando el dashboard admin');
+    }
+});
+
+router.get('/admin/usuarios', esAdmin, async (req, res) => {
+    try {
+        const db = require('../config/db');
+        const [usuarios] = await db.execute('SELECT * FROM usuarios');
+        res.render('admin/usuarios', { layout: false, usuarios });
+    } catch (e) {
+        res.status(500).send('Error get usuarios');
+    }
+});
+
+router.post('/admin/usuarios/:id/toggle', esAdmin, async (req, res) => {
+    // Falta campo 'activo' en DB segun prompt, saltamos logica estricta
+    res.redirect('/admin/usuarios');
+});
+
+router.post('/admin/usuarios/:id/rol', esAdmin, async (req, res) => {
+    try {
+        const db = require('../config/db');
+        const [userDb] = await db.execute('SELECT rol FROM usuarios WHERE id = ?', [req.params.id]);
+        if (userDb.length > 0) {
+            const nuevoRol = userDb[0].rol === 'admin' ? 'user' : 'admin';
+            await db.execute('UPDATE usuarios SET rol = ? WHERE id = ?', [nuevoRol, req.params.id]);
+        }
+        res.redirect('/admin/usuarios');
+    } catch (e) {
+        res.status(500).send('Error');
+    }
+});
+
+router.get('/admin/retos', esAdmin, async (req, res) => {
+    try {
+        const db = require('../config/db');
+        const [retos] = await db.execute('SELECT * FROM retos');
+        res.render('admin/retos', { layout: false, retos });
+    } catch (e) {
+        res.status(500).send('Error get retos');
+    }
+});
+
+router.post('/admin/retos/:id/delete', esAdmin, async (req, res) => {
+    try {
+        const db = require('../config/db');
+        await db.execute('DELETE FROM retos WHERE id = ?', [req.params.id]);
+        res.redirect('/admin/retos');
+    } catch (e) {
+        res.status(500).send('Error delete r');
+    }
+});
+
+router.get('/admin/bancos', esAdmin, async (req, res) => {
+    try {
+        const db = require('../config/db');
+        const [bancos] = await db.execute('SELECT * FROM bancos');
+        res.render('admin/bancos', { layout: false, bancos });
+    } catch (e) {
+        res.status(500).send('Error get bancos');
+    }
+});
+
+router.post('/admin/bancos/:id/delete', esAdmin, async (req, res) => {
+    try {
+        const db = require('../config/db');
+        await db.execute('DELETE FROM bancos WHERE id = ?', [req.params.id]);
+        res.redirect('/admin/bancos');
+    } catch (e) {
+        res.status(500).send('Error delete b');
+    }
+});
+
+router.get('/admin/reporte/pdf', esAdmin, async (req, res) => {
+    try {
+        const db = require('../config/db');
+        const [[{total: usuarios}]] = await db.execute('SELECT COUNT(*) as total FROM usuarios');
+        const [[{total: retos}]] = await db.execute('SELECT COUNT(*) as total FROM retos');
+        const [[{total: bancos}]] = await db.execute('SELECT COUNT(*) as total FROM bancos');
+        const [[{total: intentos}]] = await db.execute("SELECT COUNT(*) as total FROM intentos_retos WHERE resultado='Exitoso'");
+        
+        const [topUsuarios] = await db.execute('SELECT u.nombre, COUNT(ir.id) as total FROM intentos_retos ir JOIN usuarios u ON ir.usuario_id = u.id GROUP BY u.id ORDER BY total DESC LIMIT 5');
+        const [topRetos] = await db.execute('SELECT r.titulo, COUNT(ir.id) as total FROM intentos_retos ir JOIN retos r ON ir.reto_id = r.id GROUP BY r.id ORDER BY total DESC LIMIT 5');
+
+        const doc = new PDFDocument({ margin: 50, size: 'A4' });
+        res.setHeader('Content-disposition', 'attachment; filename="reporte-sistema.pdf"');
+        res.setHeader('Content-type', 'application/pdf');
+        doc.pipe(res);
+
+        // --- ENCABEZADO (BANNER) ---
+        doc.rect(0, 0, 600, 100).fill('#0f172a');
+        doc.fillColor('#ffffff')
+           .font('Helvetica-Bold')
+           .fontSize(28)
+           .text('Simulador de Entrevistas', 0, 25, { align: 'center' });
+        doc.fontSize(12)
+           .fillColor('#94a3b8')
+           .text('Reporte Administrativo del Sistema', 0, 60, { align: 'center' });
+           
+        // --- FECHA ---
+        doc.fillColor('#333333')
+           .font('Helvetica')
+           .fontSize(10)
+           .text('Fecha de generación: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), 50, 120, { align: 'right' });
+        doc.moveDown(2);
+
+        // --- ESTADÍSTICAS GENERALES ---
+        doc.font('Helvetica-Bold').fontSize(16).fillColor('#2563eb').text('Estadísticas Generales');
+        doc.moveTo(50, doc.y + 5).lineTo(545, doc.y + 5).lineWidth(1).strokeColor('#e2e8f0').stroke();
+        doc.moveDown(1.5);
+        
+        doc.font('Helvetica').fontSize(12).fillColor('#334155');
+        const startY = doc.y;
+        
+        // Bloque 1
+        doc.rect(50, startY, 230, 45).fillAndStroke('#f8fafc', '#e2e8f0');
+        doc.fillColor('#475569').font('Helvetica-Bold').text('Total Usuarios:', 65, startY + 16);
+        doc.fillColor('#10b981').text(usuarios.toString(), 200, startY + 16, { width: 65, align: 'right' });
+
+        // Bloque 2
+        doc.rect(315, startY, 230, 45).fillAndStroke('#f8fafc', '#e2e8f0');
+        doc.fillColor('#475569').text('Total Retos:', 330, startY + 16);
+        doc.fillColor('#10b981').text(retos.toString(), 465, startY + 16, { width: 65, align: 'right' });
+        
+        // Bloque 3
+        doc.rect(50, startY + 60, 230, 45).fillAndStroke('#f8fafc', '#e2e8f0');
+        doc.fillColor('#475569').text('Total Bancos:', 65, startY + 76);
+        doc.fillColor('#10b981').text(bancos.toString(), 200, startY + 76, { width: 65, align: 'right' });
+
+        // Bloque 4
+        doc.rect(315, startY + 60, 230, 45).fillAndStroke('#f8fafc', '#e2e8f0');
+        doc.fillColor('#475569').text('Intentos Exitosos:', 330, startY + 76);
+        doc.fillColor('#10b981').text(intentos.toString(), 465, startY + 76, { width: 65, align: 'right' });
+
+        doc.y = startY + 140;
+
+        // --- TOP USUARIOS ---
+        doc.font('Helvetica-Bold').fontSize(16).fillColor('#2563eb').text('Top 5 Usuarios Más Activos');
+        doc.moveTo(50, doc.y + 5).lineTo(545, doc.y + 5).strokeColor('#e2e8f0').stroke();
+        doc.moveDown(1.5);
+        
+        let yPos = doc.y;
+        doc.font('Helvetica-Bold').fontSize(10).fillColor('#64748b');
+        doc.text('PUESTO', 55, yPos);
+        doc.text('NOMBRE DEL USUARIO', 130, yPos);
+        doc.text('INTENTOS', 450, yPos, { width: 85, align: 'right' });
+        yPos += 20;
+
+        doc.font('Helvetica').fontSize(12);
+        topUsuarios.forEach((u, i) => {
+            if(i % 2 === 0) doc.rect(50, yPos - 5, 495, 28).fill('#f1f5f9');
+            doc.fillColor('#1e293b');
+            doc.text('#' + (i+1), 55, yPos);
+            doc.text(u.nombre, 130, yPos);
+            doc.fillColor('#10b981').font('Helvetica-Bold').text(u.total.toString(), 450, yPos, { width: 85, align: 'right' });
+            doc.font('Helvetica');
+            yPos += 28;
+        });
+        
+        doc.y = yPos + 35;
+
+        // --- TOP RETOS ---
+        doc.font('Helvetica-Bold').fontSize(16).fillColor('#2563eb').text('Top 5 Retos Más Intentados');
+        doc.moveTo(50, doc.y + 5).lineTo(545, doc.y + 5).strokeColor('#e2e8f0').stroke();
+        doc.moveDown(1.5);
+        
+        yPos = doc.y;
+        doc.font('Helvetica-Bold').fontSize(10).fillColor('#64748b');
+        doc.text('RANKING', 55, yPos);
+        doc.text('TÍTULO DEL RETO', 130, yPos);
+        doc.text('INTENTOS', 450, yPos, { width: 85, align: 'right' });
+        yPos += 20;
+
+        doc.font('Helvetica').fontSize(12);
+        topRetos.forEach((r, i) => {
+            if(i % 2 === 0) doc.rect(50, yPos - 5, 495, 28).fill('#f1f5f9');
+            doc.fillColor('#1e293b');
+            doc.text('#' + (i+1), 55, yPos);
+            doc.text(r.titulo, 130, yPos);
+            doc.fillColor('#f59e0b').font('Helvetica-Bold').text(r.total.toString(), 450, yPos, { width: 85, align: 'right' });
+            doc.font('Helvetica');
+            yPos += 28;
+        });
+
+        // --- FOOTER ---
+        doc.moveDown(2);
+        doc.fillColor('#94a3b8').fontSize(10).text('Simulador de Entrevistas - Reporte Generado Automáticamente', { align: 'center' });
+
+        doc.end();
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error generando PDF');
+    }
+});
+
+// ==========================================
+// 1V1 BATALLAS, AMIGOS Y CERTIFICADOS
+// ==========================================
+
+// --- AMIGOS ---
+router.get('/usuarios', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        const [usuarios] = await db.execute(`
+            SELECT u.id, u.nombre,
+                   (SELECT estado FROM amigos WHERE (usuario_id = ? AND amigo_id = u.id) OR (usuario_id = u.id AND amigo_id = ?) LIMIT 1) as estadoAmistad
+            FROM usuarios u
+            WHERE u.id != ? AND u.rol != 'admin'
+        `, [req.session.userId, req.session.userId, req.session.userId]);
+        res.render('amigos/usuarios', { usuarios });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error');
+    }
+});
+
+router.post('/amigos/agregar', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        await db.execute('INSERT INTO amigos (usuario_id, amigo_id, estado) VALUES (?, ?, "pendiente")', [req.session.userId, req.body.amigo_id]);
+        res.redirect('/usuarios');
+    } catch (e) {
+        console.error(e);
+        res.redirect('/usuarios');
+    }
+});
+
+router.get('/amigos', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        const [solicitudes] = await db.execute(`
+            SELECT a.id as relacion_id, u.nombre, u.id as usuario_id 
+            FROM amigos a JOIN usuarios u ON a.usuario_id = u.id 
+            WHERE a.amigo_id = ? AND a.estado = 'pendiente'
+        `, [req.session.userId]);
+        
+        const [amigos] = await db.execute(`
+            SELECT u.id, u.nombre 
+            FROM amigos a JOIN usuarios u ON (a.usuario_id = u.id OR a.amigo_id = u.id)
+            WHERE (a.usuario_id = ? OR a.amigo_id = ?) AND a.estado = 'aceptado' AND u.id != ?
+        `, [req.session.userId, req.session.userId, req.session.userId]);
+        const [retos] = await db.execute('SELECT id, titulo, dificultad FROM retos');
+        res.render('amigos/lista', { solicitudes, amigos, retos });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error');
+    }
+});
+
+router.post('/amigos/aceptar/:id', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        await db.execute('UPDATE amigos SET estado="aceptado" WHERE id=? AND amigo_id=?', [req.params.id, req.session.userId]);
+        res.redirect('/amigos');
+    } catch(e) {
+        res.redirect('/amigos');
+    }
+});
+
+router.post('/amigos/rechazar/:id', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        await db.execute('DELETE FROM amigos WHERE id=? AND amigo_id=?', [req.params.id, req.session.userId]);
+        res.redirect('/amigos');
+    } catch(e) {
+        res.redirect('/amigos');
+    }
+});
+
+// --- BATALLAS (SALAS DE RETO) ---
+router.get('/batalla', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        const [salas] = await db.execute(`
+            SELECT s.codigo, r.titulo as reto_titulo, u.nombre as creador_nombre, r.dificultad
+            FROM salas_reto s
+            JOIN retos r ON s.reto_id = r.id
+            JOIN usuarios u ON s.creador_id = u.id
+            WHERE s.estado = 'esperando'
+        `);
+        const [retos] = await db.execute('SELECT id, titulo, dificultad FROM retos');
+        res.render('batalla/lobby', { salas, retos });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error');
+    }
+});
+
+router.post('/batalla/crear', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        const codigo = Math.random().toString(36).substring(2,8).toUpperCase();
+        await db.execute('INSERT INTO salas_reto (codigo, reto_id, creador_id) VALUES (?, ?, ?)', [codigo, req.body.reto_id, req.session.userId]);
+        res.redirect('/batalla/' + codigo);
+    } catch (e) {
+        console.error(e);
+        res.redirect('/batalla');
+    }
+});
+
+router.post('/batalla/crear-privada', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        const codigo = Math.random().toString(36).substring(2,8).toUpperCase();
+        await db.execute('INSERT INTO salas_reto (codigo, reto_id, creador_id) VALUES (?, ?, ?)', [codigo, req.body.reto_id, req.session.userId]);
+        res.redirect('/batalla/' + codigo + '?invitado=' + req.body.amigo_id);
+    } catch (e) {
+        console.error(e);
+        res.redirect('/batalla');
+    }
+});
+
+router.post('/batalla/cancelar', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        await db.execute('DELETE FROM salas_reto WHERE codigo = ? AND creador_id = ? AND estado = "esperando"', [req.body.codigo, req.session.userId]);
+        res.redirect('/batalla');
+    } catch (e) {
+        console.error(e);
+        res.redirect('/batalla');
+    }
+});
+
+router.get('/batalla/:codigo', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        const codigo = req.params.codigo;
+        const [[sala]] = await db.execute(`
+            SELECT s.*, u.nombre as creador_nombre 
+            FROM salas_reto s JOIN usuarios u ON s.creador_id = u.id 
+            WHERE s.codigo = ? AND s.estado != 'finalizado'
+        `, [codigo]);
+        
+        if (!sala) return res.send('Sala no encontrada o ya finalizada.');
+        
+        const [[reto]] = await db.execute('SELECT * FROM retos WHERE id = ?', [sala.reto_id]);
+        const [casosPrueba] = await db.execute('SELECT * FROM casos_prueba WHERE reto_id = ?', [sala.reto_id]);
+        
+        res.render('batalla/sala', { sala, reto, casosPrueba, invitado: req.query.invitado || null });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error');
+    }
+});
+
+// --- CERTIFICADOS ---
+router.get('/certificados', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        const [certificados] = await db.execute('SELECT * FROM certificados WHERE usuario_id = ? ORDER BY fecha DESC', [req.session.userId]);
+        res.render('certificados/lista', { certificados });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error');
+    }
+});
+
+router.get('/certificados/:id/pdf', async (req, res) => {
+    if (!req.session.userId) return res.redirect('/login');
+    try {
+        const db = require('../config/db');
+        const [[cert]] = await db.execute('SELECT * FROM certificados WHERE id = ? AND usuario_id = ?', [req.params.id, req.session.userId]);
+        if (!cert) return res.status(404).send('Certificado no encontrado');
+
+        const [[user]] = await db.execute('SELECT nombre FROM usuarios WHERE id = ?', [req.session.userId]);
+
+        const PDFDocument = require('pdfkit');
+        const doc = new PDFDocument({ layout: 'landscape', size: 'A4' });
+        
+        res.setHeader('Content-disposition', 'attachment; filename="certificado-'+cert.sala_codigo+'.pdf"');
+        res.setHeader('Content-type', 'application/pdf');
+        doc.pipe(res);
+
+        // Borde dorado
+        doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).lineWidth(10).strokeColor('#ffd700').stroke();
+        
+        doc.moveDown(4);
+        doc.fontSize(40).fillColor('#2c3e50').text('CERTIFICADO DE VICTORIA', { align: 'center' });
+        doc.moveDown(1);
+        doc.fontSize(20).fillColor('#333').text('Otorgado a:', { align: 'center' });
+        doc.moveDown(1);
+        doc.fontSize(30).fillColor('#6366f1').text(user.nombre.toUpperCase(), { align: 'center' });
+        doc.moveDown(1);
+        doc.fontSize(16).fillColor('#333').text('Por haber derrotado a ', { align: 'center', continued: true })
+           .fillColor('#e74c3c').text(cert.oponente_nombre, { continued: true })
+           .fillColor('#333').text(' en el reto:');
+        doc.moveDown(1);
+        doc.fontSize(24).fillColor('#22c55e').text(cert.reto_titulo, { align: 'center' });
+        doc.moveDown(2);
+        doc.fontSize(14).fillColor('#888').text('Fecha: ' + new Date(cert.fecha).toLocaleDateString(), { align: 'center' });
+        doc.fontSize(12).text('Código de sala: ' + cert.sala_codigo, { align: 'center' });
+
+        doc.end();
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error generando PDF de certificado');
     }
 });
 

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Certificados - Simulador</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 40px;">🏆 Mis Certificados de Victoria</h2>
+        
+        <% if (certificados && certificados.length > 0) { %>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                <% certificados.forEach(c => { %>
+                    <div style="background: linear-gradient(145deg, #16161a, #0d0d0f); border: 1px solid #ffd700; border-radius: 10px; padding: 25px; text-align: center; box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);">
+                        <div style="font-size: 40px; margin-bottom: 10px;">📜</div>
+                        <h3 style="color: #ffd700; margin: 0 0 10px 0;">Victorioso</h3>
+                        <p><strong>Reto:</strong> <%= c.reto_titulo %></p>
+                        <p style="color: #888; font-size: 14px;">Derrotaste a: <%= c.oponente_nombre %></p>
+                        <p style="font-size: 12px; color: #555; margin-top: 5px;">Fecha: <%= new Date(c.fecha).toLocaleDateString() %></p>
+                        
+                        <a href="/certificados/<%= c.id %>/pdf" target="_blank" class="btn" style="background: #eab308; color: #000; margin-top: 15px; width: 100%; display: inline-block;">Descargar PDF</a>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div style="text-align: center; padding: 50px; background: #111; border-radius: 8px; border: 1px solid #333;">
+                <span style="font-size: 60px;">🏆</span>
+                <h3>Aún no has ganado ningún reto.</h3>
+                <p style="color: #aaa;">¡Ve al Lobby, reta a alguien en 1v1 y consigue tu primer certificado!</p>
+                <a href="/batalla" class="btn" style="margin-top: 20px;">Ir al Lobby</a>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Usuarios - Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <%- include('partials/sidebar') %>
+    <main class="admin-content">
+        <h1>Gestion de Usuarios</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Proveedor</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% usuarios.forEach(u => { %>
+                <tr>
+                    <td><%= u.id %></td>
+                    <td><%= u.nombre %></td>
+                    <td><%= u.email %></td>
+                    <td>
+                        <span class="badge-<%= u.proveedor ? u.proveedor.toLowerCase() : 'local' %>">
+                            <%= u.proveedor || 'Local' %>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge-<%= u.rol %>"><%= u.rol %></span>
+                    </td>
+                    <td style="display: flex; gap: 10px;">
+                        <form action="/admin/usuarios/<%= u.id %>/rol" method="POST">
+                            <input type="hidden" name="rol" value="<%= u.rol %>">
+                            <button class="btn-toggle" type="submit">Cambiar Rol</button>
+                        </form>
+                        <form action="/admin/usuarios/<%= u.id %>/toggle" method="POST">
+                            <button class="btn-toggle" type="submit">Activar/Desactivar</button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

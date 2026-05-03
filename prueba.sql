@@ -1,11 +1,25 @@
+-- --------------------------------------------------------
+-- Host:                         0c5ena.h.filess.io
+-- Versión del servidor:         11.6.2-MariaDB-ubu2404 - mariadb.org binary distribution
+-- SO del servidor:              debian-linux-gnu
+-- HeidiSQL Versión:             12.17.0.7270
+-- --------------------------------------------------------
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
-
--- Dumping database structure for simulador_db_highwaydid
+-- Volcando estructura de base de datos para simulador_db_highwaydid
 CREATE DATABASE IF NOT EXISTS `simulador_db_highwaydid` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
 USE `simulador_db_highwaydid`;
 
--- Dumping structure for table simulador_db_highwaydid.bancos
+-- Volcando estructura para tabla simulador_db_highwaydid.bancos
 CREATE TABLE IF NOT EXISTS `bancos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `titulo` varchar(150) NOT NULL,
@@ -16,18 +30,20 @@ CREATE TABLE IF NOT EXISTS `bancos` (
   PRIMARY KEY (`id`),
   KEY `autor_id` (`autor_id`),
   CONSTRAINT `bancos_ibfk_1` FOREIGN KEY (`autor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table simulador_db_highwaydid.bancos: ~6 rows (approximately)
+-- Volcando datos para la tabla simulador_db_highwaydid.bancos: ~8 rows (aproximadamente)
 INSERT INTO `bancos` (`id`, `titulo`, `descripcion`, `categoria`, `autor_id`, `fecha_creacion`) VALUES
 	(1, 'JavaScript Avanzado', 'Preguntas sobre closures, promesas, event loop y patrones modernos de JS.', 'Programación', 1, '2026-04-12 03:21:52'),
 	(2, 'SQL y Bases de Datos', 'Consultas SQL, optimización, índices, transacciones y modelado relacional.', 'Bases de Datos', 1, '2026-04-12 03:21:52'),
 	(3, 'Python para Backend', 'Decoradores, OOP, manejo de errores, librerías y buenas prácticas en Python.', 'Programación', 2, '2026-04-12 03:21:52'),
 	(4, 'Algoritmos y Estructuras', 'Complejidad algorítmica, ordenamiento, búsqueda, grafos y estructuras de datos.', 'Algoritmos', 2, '2026-04-12 03:21:52'),
 	(5, 'HTML, CSS y Frontend', 'Responsive design, flexbox, grid, accesibilidad y rendimiento web.', 'Frontend', 3, '2026-04-12 03:21:52'),
-	(6, 'Git y DevOps', 'Control de versiones, ramas, CI/CD, Docker y flujos de trabajo profesionales.', 'DevOps', 3, '2026-04-12 03:21:52');
+	(6, 'Git y DevOps', 'Control de versiones, ramas, CI/CD, Docker y flujos de trabajo profesionales.', 'DevOps', 3, '2026-04-12 03:21:52'),
+	(7, 'GAA', 'GAA', 'GAA', 6, '2026-04-29 05:37:59'),
+	(8, 'A', 'A', 'A', 11, '2026-05-03 00:03:37');
 
--- Dumping structure for table simulador_db_highwaydid.calificaciones
+-- Volcando estructura para tabla simulador_db_highwaydid.calificaciones
 CREATE TABLE IF NOT EXISTS `calificaciones` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `usuario_id` int(11) DEFAULT NULL,
@@ -40,9 +56,9 @@ CREATE TABLE IF NOT EXISTS `calificaciones` (
   KEY `banco_id` (`banco_id`),
   CONSTRAINT `calificaciones_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `calificaciones_ibfk_2` FOREIGN KEY (`banco_id`) REFERENCES `bancos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table simulador_db_highwaydid.calificaciones: ~13 rows (approximately)
+-- Volcando datos para la tabla simulador_db_highwaydid.calificaciones: ~15 rows (aproximadamente)
 INSERT INTO `calificaciones` (`id`, `usuario_id`, `banco_id`, `estrellas`, `comentario`, `fecha_calificacion`) VALUES
 	(1, 1, 3, 5, 'Excelentes preguntas de Python, muy completo para preparar entrevistas.', '2026-04-12 03:21:55'),
 	(2, 1, 4, 4, 'Buenas preguntas de algoritmos, me ayudaron a repasar complejidad.', '2026-04-12 03:21:55'),
@@ -56,9 +72,11 @@ INSERT INTO `calificaciones` (`id`, `usuario_id`, `banco_id`, `estrellas`, `come
 	(10, 3, 2, 5, 'SQL muy completo, incluye ACID y optimización que siempre preguntan.', '2026-04-12 03:21:55'),
 	(11, 3, 3, 4, 'Python bien cubierto, especialmente decoradores y GIL.', '2026-04-12 03:21:55'),
 	(12, 3, 5, 5, 'El banco de HTML/CSS es mi favorito, muy práctico.', '2026-04-12 03:21:55'),
-	(13, 1, 1, 4, NULL, '2026-04-12 03:33:17');
+	(13, 1, 1, 4, NULL, '2026-04-12 03:33:17'),
+	(16, 5, 7, 1, NULL, '2026-04-29 05:38:36'),
+	(17, 6, 2, 5, NULL, '2026-04-30 02:41:51');
 
--- Dumping structure for table simulador_db_highwaydid.calificaciones_retos
+-- Volcando estructura para tabla simulador_db_highwaydid.calificaciones_retos
 CREATE TABLE IF NOT EXISTS `calificaciones_retos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `usuario_id` int(11) DEFAULT NULL,
@@ -68,11 +86,13 @@ CREATE TABLE IF NOT EXISTS `calificaciones_retos` (
   UNIQUE KEY `usuario_id` (`usuario_id`,`reto_id`),
   KEY `reto_id` (`reto_id`),
   CONSTRAINT `calificaciones_retos_ibfk_1` FOREIGN KEY (`reto_id`) REFERENCES `retos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table simulador_db_highwaydid.calificaciones_retos: ~0 rows (approximately)
+-- Volcando datos para la tabla simulador_db_highwaydid.calificaciones_retos: ~1 rows (aproximadamente)
+INSERT INTO `calificaciones_retos` (`id`, `usuario_id`, `reto_id`, `estrellas`) VALUES
+	(1, 1, 1, 5);
 
--- Dumping structure for table simulador_db_highwaydid.casos_prueba
+-- Volcando estructura para tabla simulador_db_highwaydid.casos_prueba
 CREATE TABLE IF NOT EXISTS `casos_prueba` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `reto_id` int(11) NOT NULL,
@@ -82,9 +102,9 @@ CREATE TABLE IF NOT EXISTS `casos_prueba` (
   PRIMARY KEY (`id`),
   KEY `reto_id` (`reto_id`),
   CONSTRAINT `casos_prueba_ibfk_1` FOREIGN KEY (`reto_id`) REFERENCES `retos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table simulador_db_highwaydid.casos_prueba: ~54 rows (approximately)
+-- Volcando datos para la tabla simulador_db_highwaydid.casos_prueba: ~58 rows (aproximadamente)
 INSERT INTO `casos_prueba` (`id`, `reto_id`, `input`, `output_esperado`, `es_visible`) VALUES
 	(1, 1, '70, 1.75', '22.9', 1),
 	(2, 1, '90, 1.80', '27.8', 1),
@@ -139,9 +159,13 @@ INSERT INTO `casos_prueba` (`id`, `reto_id`, `input`, `output_esperado`, `es_vis
 	(51, 14, '2, 3', '5', 1),
 	(52, 14, '-1, 5', '4', 1),
 	(53, 15, '2, 3', '5', 1),
-	(54, 15, '-1, 5', '4', 0);
+	(54, 15, '-1, 5', '4', 0),
+	(55, 16, '6', 'true', 1),
+	(56, 16, '12', 'false', 0),
+	(57, 17, 'GA', 'GA', 1),
+	(58, 17, 'GA', 'GA', 0);
 
--- Dumping structure for table simulador_db_highwaydid.intentos
+-- Volcando estructura para tabla simulador_db_highwaydid.intentos
 CREATE TABLE IF NOT EXISTS `intentos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `usuario_id` int(11) NOT NULL,
@@ -155,14 +179,16 @@ CREATE TABLE IF NOT EXISTS `intentos` (
   KEY `banco_id` (`banco_id`),
   CONSTRAINT `intentos_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   CONSTRAINT `intentos_ibfk_2` FOREIGN KEY (`banco_id`) REFERENCES `bancos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table simulador_db_highwaydid.intentos: ~2 rows (approximately)
+-- Volcando datos para la tabla simulador_db_highwaydid.intentos: ~4 rows (aproximadamente)
 INSERT INTO `intentos` (`id`, `usuario_id`, `banco_id`, `puntaje`, `total`, `tiempo_segundos`, `fecha`) VALUES
 	(1, 1, 1, 1, 10, 11, '2026-04-12 04:21:48'),
-	(2, 1, 2, 2, 10, 28, '2026-04-13 21:14:14');
+	(2, 1, 2, 2, 10, 28, '2026-04-13 21:14:14'),
+	(3, 5, 1, 6, 10, 13, '2026-04-29 05:36:31'),
+	(4, 5, 7, 1, 1, 2, '2026-04-29 05:38:31');
 
--- Dumping structure for table simulador_db_highwaydid.intentos_retos
+-- Volcando estructura para tabla simulador_db_highwaydid.intentos_retos
 CREATE TABLE IF NOT EXISTS `intentos_retos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `usuario_id` int(11) NOT NULL,
@@ -175,9 +201,9 @@ CREATE TABLE IF NOT EXISTS `intentos_retos` (
   KEY `reto_id` (`reto_id`),
   CONSTRAINT `intentos_retos_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   CONSTRAINT `intentos_retos_ibfk_2` FOREIGN KEY (`reto_id`) REFERENCES `retos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
--- Dumping data for table simulador_db_highwaydid.intentos_retos: ~77 rows (approximately)
+-- Volcando datos para la tabla simulador_db_highwaydid.intentos_retos: ~117 rows (aproximadamente)
 INSERT INTO `intentos_retos` (`id`, `usuario_id`, `reto_id`, `codigo_enviado`, `resultado`, `fecha`) VALUES
 	(1, 1, 1, 'function solucion(n) { return 30; }', 'Exitoso', '2026-04-15 05:05:46'),
 	(2, 1, 2, 'function solucion(t) { return "aloh"; }', 'Exitoso', '2026-04-15 05:05:46'),
@@ -255,9 +281,49 @@ INSERT INTO `intentos_retos` (`id`, `usuario_id`, `reto_id`, `codigo_enviado`, `
 	(74, 4, 13, 'public static String solucion(String cadena) {\n    return "hola";\n}', 'Fallido', '2026-04-18 18:48:59'),
 	(75, 4, 13, 'public static String solucion(String cadena) {\n    String invertida = new StringBuilder(cadena).reverse().toString();\n    return String.valueOf(cadena.equals(invertida));\n}', 'Exitoso', '2026-04-18 18:49:25'),
 	(76, 4, 15, 'def solucion(a, b):\n    return a - b', 'Fallido', '2026-04-18 18:50:26'),
-	(77, 4, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-18 18:50:39');
+	(77, 4, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-18 18:50:39'),
+	(78, 1, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-26 23:42:45'),
+	(79, 1, 15, 'def solucion(a, b):\n    # Tu lógica aquísdsada', 'Fallido', '2026-04-26 23:43:25'),
+	(80, 1, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-26 23:43:45'),
+	(81, 1, 15, 'def solucion(a, b):\n    # Tu lógica aquí', 'Fallido', '2026-04-26 23:44:02'),
+	(82, 1, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-26 23:44:19'),
+	(83, 1, 16, 'int solucion(int n) {\n  int suma = 0;\n  for (int i = 1; i <= n/2; i++) {\n    if (n % i == 0) suma += i;\n  }\n  return suma == n;\n}', 'Fallido', '2026-04-27 01:11:58'),
+	(84, 1, 16, '#include <iostream>\nusing namespace std;\n[CÓDIGO DEL USUARIO]\nint main() {\n    int n;\n    cin >> n;\n    cout << (solucion(n) ? "true" : "false") << endl;\n    return 0;\n}', 'Fallido', '2026-04-27 01:12:45'),
+	(85, 1, 16, 'int solucion(int n) {\n  int suma = 0;\n  for (int i = 1; i <= n/2; i++) {\n    if (n % i == 0) suma += i;\n  }\n  return suma == n;\n}', 'Fallido', '2026-04-27 01:30:59'),
+	(86, 1, 16, 'int solucion(int n) {\n  int suma = 0;\n  for (int i = 1; i <= n/2; i++) {\n    if (n % i == 0) suma += i;\n  }\n  return suma == n;\n}', 'Exitoso', '2026-04-27 01:32:16'),
+	(87, 1, 16, 'int solucion(int n) {\n  int suma = 0;\n  for (int i = 1; i <= n/2; i++) {\n    if (n % i == 0) suma += i;\n  }\n  return suma == n;\n}', 'Exitoso', '2026-04-27 01:32:46'),
+	(88, 1, 1, 'function solucion(peso, altura) {\n  // IMC = peso / (altura * altura)\n}', 'Fallido', '2026-04-27 18:34:39'),
+	(89, 5, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-29 05:39:50'),
+	(90, 5, 17, 'GA', 'Fallido', '2026-04-29 05:41:56'),
+	(91, 7, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-29 06:08:36'),
+	(92, 6, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-29 06:28:51'),
+	(93, 6, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-29 06:29:06'),
+	(94, 5, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-29 06:36:18'),
+	(95, 6, 1, 'function solucion(peso, altura) {\n  // IMC = peso / (altura * altura)\n}', 'Fallido', '2026-04-29 21:50:14'),
+	(96, 6, 14, 'int solucion(int a, int b) {\n  // Tu lógica aquí\n  return a + b;\n\n}', 'Fallido', '2026-04-29 21:51:05'),
+	(97, 6, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-29 21:52:38'),
+	(98, 6, 14, 'int solucion(int a, int b) {\n  // Tu lógica aquí\n  return a + b;\n}', 'Fallido', '2026-04-29 21:53:24'),
+	(99, 6, 14, '#include<iostream>\n\nusing namespace std;\n\nint solucion(int a, int b) {\n  // Tu lógica aquí\nreturn a + b;\n}\n\nint main(){\ncout >> solucion(1+2);\nreturn 0;\n}', 'Fallido', '2026-04-29 21:55:13'),
+	(100, 6, 13, 'public class Main {\n    public static String esPalindromo(String texto) {\n        String limpio = texto.toLowerCase().replaceAll("[^a-z0-9]", "");\n        String invertido = new StringBuilder(limpio).reverse().toString();\n        return String.valueOf(limpio.equals(invertido));\n    }\n\n    public static void main(String[] args) {\n        System.out.println(esPalindromo("ana"));      // true\n        System.out.println(esPalindromo("hello"));    // false\n        System.out.println(esPalindromo("reconocer")); // true\n    }\n}', 'Fallido', '2026-04-29 21:56:07'),
+	(101, 6, 13, 'public static String solucion(String texto) {\n    String limpio = texto.toLowerCase().replaceAll("[^a-z0-9]", "");\n    String invertido = new StringBuilder(limpio).reverse().toString();\n    return String.valueOf(limpio.equals(invertido));\n}', 'Exitoso', '2026-04-29 21:56:25'),
+	(102, 6, 13, 'public static String solucion(String texto) {\n    String limpio = texto.toLowerCase().replaceAll("[^a-z0-9]", "");\n    String invertido = new StringBuilder(limpio).reverse().toString();\n    return String.valueOf(limpio.equals(invertido));\n}\n', 'Exitoso', '2026-04-30 02:29:58'),
+	(103, 8, 1, 'function solucion(peso, altura) {\n\n\n  IMC = peso / (altura * altura)\n}', 'Fallido', '2026-04-30 02:30:04'),
+	(104, 8, 1, 'function solucion(peso, altura) {\n\n\n  IMC = peso / (altura * altura)\n  return IMC\n\n}', 'Fallido', '2026-04-30 02:30:26'),
+	(105, 8, 1, 'function solucion(peso, altura) {\n\n\n  int IMC = peso / (altura * altura)\n  return IMC\n\n}', 'Fallido', '2026-04-30 02:30:41'),
+	(106, 8, 1, 'function solucion(peso, altura) {\n\n\n  int IMC = peso / (altura * altura)\n  return IMC\n\n}', 'Fallido', '2026-04-30 02:30:52'),
+	(107, 8, 1, 'function solucion(peso, altura) {\n\n\n  IMC = peso / (altura * altura)\n  return IMC\n\n}', 'Fallido', '2026-04-30 02:31:02'),
+	(108, 8, 1, 'function solucion(peso, altura) {\n\n\n  IMC = peso / (altura * altura)\n  return MathRound(IMC)\n\n}', 'Fallido', '2026-04-30 02:31:29'),
+	(109, 8, 1, 'function solucion(peso, altura) {\n\n\n  IMC = peso / (altura * altura)\n  return Math.round(IMC)\n\n}', 'Fallido', '2026-04-30 02:31:39'),
+	(110, 6, 13, 'public static String solucion(String texto) {\n    String invertido = new StringBuilder(texto).reverse().toString();\n    return String.valueOf(texto == invertido);\n}', 'Fallido', '2026-04-30 02:32:16'),
+	(111, 8, 1, 'function solucion(peso, altura) {\n  IMC = peso / (altura * altura)\n  return IMC.toFixed(2)\n}', 'Fallido', '2026-04-30 02:32:46'),
+	(112, 6, 15, 'def solucion(a, b):\n    return a + b', 'Exitoso', '2026-04-30 02:32:53'),
+	(113, 8, 1, 'function solucion(peso, altura) {\n  IMC = peso / (altura * altura)\n  return IMC\n}', 'Fallido', '2026-04-30 02:33:01'),
+	(114, 8, 1, 'function solucion(peso, altura) {\n  IMC = peso / (altura * altura)\n  return IMC.toFixed(1)\n}', 'Exitoso', '2026-04-30 02:33:18'),
+	(115, 6, 13, 'public static String solucion(String texto) {\n    String invertido = new StringBuilder(texto).reverse().toString();\n    return String.valueOf(texto == invertido);\n}', 'Fallido', '2026-04-30 02:38:25'),
+	(116, 6, 13, 'public static String solucion(String texto) {\n    String limpio = texto.toLowerCase().replaceAll("[^a-z0-9]", "");\n    String invertido = new StringBuilder(limpio).reverse().toString();\n    return String.valueOf(limpio.equals(invertido));\n}', 'Exitoso', '2026-04-30 02:38:39'),
+	(117, 6, 15, 'def solucion(a, b):\n    # Tu lógica aquí\n return a + b', 'Exitoso', '2026-04-30 02:39:12');
 
--- Dumping structure for table simulador_db_highwaydid.preguntas
+-- Volcando estructura para tabla simulador_db_highwaydid.preguntas
 CREATE TABLE IF NOT EXISTS `preguntas` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `banco_id` int(11) DEFAULT NULL,
@@ -272,9 +338,9 @@ CREATE TABLE IF NOT EXISTS `preguntas` (
   PRIMARY KEY (`id`),
   KEY `banco_id` (`banco_id`),
   CONSTRAINT `preguntas_ibfk_1` FOREIGN KEY (`banco_id`) REFERENCES `bancos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table simulador_db_highwaydid.preguntas: ~60 rows (approximately)
+-- Volcando datos para la tabla simulador_db_highwaydid.preguntas: ~62 rows (aproximadamente)
 INSERT INTO `preguntas` (`id`, `banco_id`, `enunciado`, `opcion_a`, `opcion_b`, `opcion_c`, `opcion_d`, `opcion_e`, `opcion_f`, `respuesta_correcta`) VALUES
 	(1, 1, '¿Qué es un closure en JavaScript?', 'Una función sin parámetros', 'Una función que recuerda el scope donde fue creada aunque ese scope ya no esté activo', 'Un método especial de los arrays', 'Una variable global compartida entre funciones', NULL, NULL, 'B'),
 	(2, 1, '¿Cuál es la salida de: console.log(typeof null)?', '"null"', '"undefined"', '"object"', '"string"', NULL, NULL, 'C'),
@@ -335,9 +401,11 @@ INSERT INTO `preguntas` (`id`, `banco_id`, `enunciado`, `opcion_a`, `opcion_b`, 
 	(57, 6, '¿Qué es CI/CD?', 'Un sistema de control de versiones', 'Integración Continua / Entrega Continua: automatizar builds, tests y despliegues', 'Una metodología de gestión de proyectos', 'Un tipo de contenedor Docker', NULL, NULL, 'B'),
 	(58, 6, '¿Qué es Docker?', 'Una máquina virtual completa', 'Un sistema de control de versiones para contenedores', 'Plataforma para empaquetar aplicaciones en contenedores ligeros y portables', 'Un servidor web de alto rendimiento', NULL, NULL, 'C'),
 	(59, 6, '¿Cuál es la diferencia entre git reset y git revert?', 'Son idénticos en resultado', 'reset mueve el HEAD (puede ser destructivo); revert crea un nuevo commit que deshace cambios', 'revert borra el historial; reset lo conserva', 'reset solo funciona en ramas locales', NULL, NULL, 'B'),
-	(60, 6, '¿Qué es gitflow?', 'El comando para ver el flujo de commits', 'Una extensión de Git para gestionar releases', 'Un modelo de ramificación con ramas: main, develop, feature, release, hotfix', 'Una herramienta visual de Git', NULL, NULL, 'C');
+	(60, 6, '¿Qué es gitflow?', 'El comando para ver el flujo de commits', 'Una extensión de Git para gestionar releases', 'Un modelo de ramificación con ramas: main, develop, feature, release, hotfix', 'Una herramienta visual de Git', NULL, NULL, 'C'),
+	(62, 7, 'GAA', 'GAA', 'GA', NULL, NULL, NULL, NULL, 'A'),
+	(63, 8, '1', '1', '2', NULL, NULL, NULL, NULL, 'A');
 
--- Dumping structure for table simulador_db_highwaydid.retos
+-- Volcando estructura para tabla simulador_db_highwaydid.retos
 CREATE TABLE IF NOT EXISTS `retos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `titulo` varchar(150) NOT NULL,
@@ -352,9 +420,9 @@ CREATE TABLE IF NOT EXISTS `retos` (
   `autor_id` int(11) DEFAULT NULL,
   `solucion` text DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table simulador_db_highwaydid.retos: ~15 rows (approximately)
+-- Volcando datos para la tabla simulador_db_highwaydid.retos: ~17 rows (aproximadamente)
 INSERT INTO `retos` (`id`, `titulo`, `enunciado`, `codigo_inicial`, `test_input`, `test_output`, `dificultad`, `puntos`, `lenguaje`, `pista`, `autor_id`, `solucion`) VALUES
 	(1, 'Calculadora de IMC', 'Crea una función "solucion" que reciba el peso (kg) y la altura (m) y devuelva el Índice de Masa Corporal redondeado a 1 decimal.', 'function solucion(peso, altura) {\n  // IMC = peso / (altura * altura)\n}', '70, 1.75', '22.9', 'Fácil', 10, 'JavaScript', 'Usa la fórmula: peso / (altura * altura) y redondea con toFixed(1).', NULL, NULL),
 	(2, 'Verificador de Primos', 'Escribe una función que devuelva true si un número es primo y false si no lo es.', 'function solucion(n) {\n  // Tu lógica aquí\n}', '7', 'true', 'Medio', 10, 'JavaScript', 'Itera desde 2 hasta Math.sqrt(n). Si n es divisible por alguno, no es primo.', NULL, NULL),
@@ -370,9 +438,11 @@ INSERT INTO `retos` (`id`, `titulo`, `enunciado`, `codigo_inicial`, `test_input`
 	(12, 'Invertir Array', 'Recibe un array y devuélvelo en orden inverso.', 'function solucion(arr) {\n  // Lógica de reversa\n}', '[1, 2, 3]', '[3, 2, 1]', 'Medio', 10, 'JavaScript', 'Puedes usar arr.reverse() o un loop que recorra el array desde el final.', NULL, NULL),
 	(13, 'Palíndromos en Java', 'Crea una función que reciba una cadena de texto y determine si es un palíndromo (se lee igual de izquierda a derecha que de derecha a izquierda).\r\nLa función debe devolver "true" si es palíndromo y "false" si no lo es.', 'function solucion(texto) {\n  // Tu lógica aquí\n}', '"ana"', 'true', 'Difícil', 10, 'Java', 'Convierte el texto a minúsculas y compáralo con su versión invertida usando StringBuilder.', 1, NULL),
 	(14, 'Suma de Dos Números', 'Crea una función que reciba dos números enteros y devuelva su suma.', 'int solucion(int a, int b) {\r\n  // Tu lógica aquí\r\n}', '2, 3', '5', 'Fácil', 10, 'C++', 'Solo necesitas usar el operador +.', 1, NULL),
-	(15, 'Suma de dos números en Python', 'Crea una función que reciba dos números y devuelva su suma.', 'def solucion(a, b):\r\n    # Tu lógica aquí', '2, 3', '5', 'Fácil', 10, 'Python', 'Usa el operador + para sumar a y b.', 1, NULL);
+	(15, 'Suma de dos números en Python', 'Crea una función que reciba dos números y devuelva su suma.', 'def solucion(a, b):\r\n    # Tu lógica aquí', '2, 3', '5', 'Fácil', 10, 'Python', 'Usa el operador + para sumar a y b.', 1, NULL),
+	(16, 'Números Perfectos', 'Un número perfecto es aquel que es igual a la suma de sus divisores propios (excluyendo el mismo número). Crea una función que reciba un número entero positivo y devuelva "true" si es perfecto y "false" si no lo es. Ejemplo: 6 es perfecto porque 1+2+3=6.', 'int solucion(int n) {\r\n  // Tu lógica aquí\r\n}', '6', 'true', 'Difícil', 10, 'C++', 'Itera desde 1 hasta n/2 y suma los divisores. Compara la suma con n.', 1, NULL),
+	(17, 'GA', 'GA', 'GA', 'GA', 'GA', 'Fácil', 10, 'JavaScript', 'GA', 5, NULL);
 
--- Dumping structure for table simulador_db_highwaydid.usuarios
+-- Volcando estructura para tabla simulador_db_highwaydid.usuarios
 CREATE TABLE IF NOT EXISTS `usuarios` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nombre` varchar(100) NOT NULL,
@@ -382,14 +452,52 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table simulador_db_highwaydid.usuarios: ~4 rows (approximately)
+-- Volcando datos para la tabla simulador_db_highwaydid.usuarios: ~11 rows (aproximadamente)
 INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `foto_perfil`, `fecha_registro`) VALUES
 	(1, 'Diego Castillo', 'diego@upt.pe', '123', 'default-user.png', '2026-04-12 03:21:52'),
 	(2, 'Ana Torres', 'ana@gmail.com', '123', 'default-user.png', '2026-04-12 03:21:52'),
 	(3, 'Carlos Ayala', 'carlos@upt.pe', '123', 'default-user.png', '2026-04-12 03:21:52'),
-	(4, 'Joan Medina', 'joan@upt.pe', '$2b$10$szInG/BKJgqAxLZdHE/cQuYh28nY2ZtOPX2..RHmOMDo6gLHzT0fy', 'default-user.png', '2026-04-12 03:26:58');
+	(4, 'Joan Medina', 'joan@upt.pe', '$2b$10$szInG/BKJgqAxLZdHE/cQuYh28nY2ZtOPX2..RHmOMDo6gLHzT0fy', 'default-user.png', '2026-04-12 03:26:58'),
+	(5, 'Estrella Castillo', 'estrellacastillo227@gmail.com', '$2b$10$BXloNqMCWzCpxiUQSLvLgOBAr0ifhyiOQgK5RMPY0DMr9I6CdMK7q', 'default-user.png', '2026-04-29 05:35:48'),
+	(6, 'DIEGO FERNANDO CASTILLO MAMANI', 'dc2022073895@virtual.upt.pe', '$2b$10$atGuFdS0a5fWmASPEZqIQe0YT40q3K6aU86jU52ZVYTXluxx/OuXu', 'default-user.png', '2026-04-29 05:37:49'),
+	(7, 'DIEGO CASTILLO', 'diegofernandocastillo848@gmail.com', '$2b$10$4JrrYstpyjhy1HL4d4KH2eLilLyCf2m/tEgvunmvSn7S5GHGavicK', 'default-user.png', '2026-04-29 06:07:54'),
+	(8, 'Sergio Pro123', 'sergiotlv51@gmail.com', '$2b$10$poJN1S9dH.ArgD24DYWeauvscp.YSmdUyQGaGKTiIXiifU2cypCTq', 'default-user.png', '2026-04-30 02:29:21'),
+	(9, 'PATRICK JOSE CUADROS QUIROGA', 'patcuadrosq@virtual.upt.pe', '$2b$10$yWKshlJmjuKFiaZfBdcgIOYsnbZu/tECvKZMiS6EvdwN8Vb59Qx1u', 'default-user.png', '2026-04-30 02:41:55'),
+	(10, 'HASHIRA BELÉN VARGAS CANDIA', 'hv2022075480@virtual.upt.pe', '$2b$10$Aod1RZHiWD2M/pgb6YHdM.6CB70D9ujqykLZq8jHOicLjqMSZVCJ.', 'default-user.png', '2026-04-30 02:42:41'),
+	(11, 'A', 'a@a.com', '$2b$10$.LF5cC8loRkuRFGLIImRVOwBVHzgvF7sGZ7nmg65cI/25nr5XiPQC', 'default-user.png', '2026-05-03 00:03:16');
+
+
+CREATE TABLE amigos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT,
+  amigo_id INT,
+  estado ENUM('pendiente','aceptado') DEFAULT 'pendiente',
+  fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE salas_reto (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  codigo VARCHAR(8) UNIQUE,
+  reto_id INT,
+  creador_id INT,
+  estado ENUM('esperando','en_curso','finalizado') DEFAULT 'esperando',
+  ganador_id INT DEFAULT NULL,
+  fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE certificados (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  sala_codigo VARCHAR(8) NOT NULL,
+  reto_titulo VARCHAR(150) NOT NULL,
+  oponente_nombre VARCHAR(100) NOT NULL,
+  fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

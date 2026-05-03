@@ -6,8 +6,30 @@
         <a href="/bancos" class="btn-crear">Inicio (Comunidad)</a>
         <a href="/dashboard" class="btn-crear">Mis Bancos</a>
         <a href="/retos" class="btn-crear">Retos de Código</a>
+        <a href="/batalla" class="btn-crear">Lobby</a>
+        <a href="/usuarios" class="btn-crear">Usuarios</a>
+        <a href="/amigos" class="btn-crear">Amigos</a>
+        <a href="/certificados" class="btn-crear">Certificados</a>
         <a href="/bancos/crear" class="btn-crear">+ Crear Banco</a>
         <a href="/retos/crear" class="btn-crear">+ Crear Reto</a>
         <a href="/logout" class="btn-logout">Cerrar Sesión</a>
     </div>
 </nav>
+
+<!-- Lógica Global de Socket.io para rastreo de usuarios conectados -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    <% if (userName) { %>
+        // Solo conectamos al socket si hay un userName disponible
+        const globalSocket = io();
+        globalSocket.emit('usuario-conectado', { nombre: '<%= userName %>', id: '<%= userId %>' });
+
+        globalSocket.on('invitacion-recibida', (data) => {
+            if (confirm(`⚔️ ¡${data.retador} te ha desafiado a una batalla de código!\nReto: "${data.reto}"\n\n¿Aceptas el reto?`)) {
+                window.location.href = `/batalla/${data.codigo}`;
+            } else {
+                globalSocket.emit('invitacion-rechazada', { codigo: data.codigo });
+            }
+        });
+    <% } %>
+</script>
