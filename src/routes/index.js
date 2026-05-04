@@ -580,20 +580,24 @@ router.get('/admin/reporte/pdf', esAdmin, async (req, res) => {
         const [topUsuarios] = await db.execute('SELECT u.nombre, COUNT(ir.id) as total FROM intentos_retos ir JOIN usuarios u ON ir.usuario_id = u.id GROUP BY u.id ORDER BY total DESC LIMIT 5');
         const [topRetos] = await db.execute('SELECT r.titulo, COUNT(ir.id) as total FROM intentos_retos ir JOIN retos r ON ir.reto_id = r.id GROUP BY r.id ORDER BY total DESC LIMIT 5');
 
-        const doc = new PDFDocument({ margin: 50, size: 'A4' });
+        const doc = new PDFDocument({ margin: 50, size: 'A4', autoFirstPage: true });
+        // Desactivamos temporalmente el salto automático para controlar la página nosotros
+        // pero PDFKit a veces genera páginas extra si moveDown excede el bottom margin
+        doc.info['Title'] = 'Reporte Administrativo';
+        
         res.setHeader('Content-disposition', 'attachment; filename="reporte-sistema.pdf"');
         res.setHeader('Content-type', 'application/pdf');
         doc.pipe(res);
 
         // --- ENCABEZADO (BANNER) ---
-        doc.rect(0, 0, 600, 100).fill('#0f172a');
+        doc.rect(0, 0, doc.page.width, 100).fill('#0f172a');
         doc.fillColor('#ffffff')
            .font('Helvetica-Bold')
            .fontSize(28)
-           .text('Simulador de Entrevistas', 0, 25, { align: 'center' });
+           .text('Simulador de Entrevistas', 0, 25, { align: 'center', width: doc.page.width });
         doc.fontSize(12)
            .fillColor('#94a3b8')
-           .text('Reporte Administrativo del Sistema', 0, 60, { align: 'center' });
+           .text('Reporte Administrativo del Sistema', 0, 60, { align: 'center', width: doc.page.width });
            
         // --- FECHA ---
         doc.fillColor('#333333')
@@ -631,58 +635,62 @@ router.get('/admin/reporte/pdf', esAdmin, async (req, res) => {
         doc.fillColor('#10b981').text(intentos.toString(), 465, startY + 76, { width: 65, align: 'right' });
 
         doc.y = startY + 140;
+        doc.x = 50;
 
         // --- TOP USUARIOS ---
-        doc.font('Helvetica-Bold').fontSize(16).fillColor('#2563eb').text('Top 5 Usuarios Más Activos');
+        doc.font('Helvetica-Bold').fontSize(16).fillColor('#2563eb').text('Top 5 Usuarios Más Activos', 50, doc.y);
         doc.moveTo(50, doc.y + 5).lineTo(545, doc.y + 5).strokeColor('#e2e8f0').stroke();
-        doc.moveDown(1.5);
         
-        let yPos = doc.y;
+        let yPos = doc.y + 15;
         doc.font('Helvetica-Bold').fontSize(10).fillColor('#64748b');
-        doc.text('PUESTO', 55, yPos);
-        doc.text('NOMBRE DEL USUARIO', 130, yPos);
-        doc.text('INTENTOS', 450, yPos, { width: 85, align: 'right' });
+        doc.text('PUESTO', 55, yPos, { lineBreak: false });
+        doc.text('NOMBRE DEL USUARIO', 130, yPos, { lineBreak: false });
+        doc.text('INTENTOS', 450, yPos, { width: 85, align: 'right', lineBreak: false });
         yPos += 20;
 
         doc.font('Helvetica').fontSize(12);
         topUsuarios.forEach((u, i) => {
             if(i % 2 === 0) doc.rect(50, yPos - 5, 495, 28).fill('#f1f5f9');
             doc.fillColor('#1e293b');
-            doc.text('#' + (i+1), 55, yPos);
-            doc.text(u.nombre, 130, yPos);
-            doc.fillColor('#10b981').font('Helvetica-Bold').text(u.total.toString(), 450, yPos, { width: 85, align: 'right' });
+            doc.text('#' + (i+1), 55, yPos, { lineBreak: false });
+            doc.text(u.nombre, 130, yPos, { lineBreak: false });
+            doc.fillColor('#10b981').font('Helvetica-Bold').text(u.total.toString(), 450, yPos, { width: 85, align: 'right', lineBreak: false });
             doc.font('Helvetica');
             yPos += 28;
         });
         
-        doc.y = yPos + 35;
+        yPos += 20;
 
         // --- TOP RETOS ---
-        doc.font('Helvetica-Bold').fontSize(16).fillColor('#2563eb').text('Top 5 Retos Más Intentados');
+        doc.font('Helvetica-Bold').fontSize(16).fillColor('#2563eb').text('Top 5 Retos Más Intentados', 50, yPos);
         doc.moveTo(50, doc.y + 5).lineTo(545, doc.y + 5).strokeColor('#e2e8f0').stroke();
-        doc.moveDown(1.5);
         
-        yPos = doc.y;
+        yPos = doc.y + 15;
         doc.font('Helvetica-Bold').fontSize(10).fillColor('#64748b');
-        doc.text('RANKING', 55, yPos);
-        doc.text('TÍTULO DEL RETO', 130, yPos);
-        doc.text('INTENTOS', 450, yPos, { width: 85, align: 'right' });
+        doc.text('RANKING', 55, yPos, { lineBreak: false });
+        doc.text('TÍTULO DEL RETO', 130, yPos, { lineBreak: false });
+        doc.text('INTENTOS', 450, yPos, { width: 85, align: 'right', lineBreak: false });
         yPos += 20;
 
         doc.font('Helvetica').fontSize(12);
         topRetos.forEach((r, i) => {
+            let limitTitulo = r.titulo.length > 50 ? r.titulo.substring(0, 47) + '...' : r.titulo;
             if(i % 2 === 0) doc.rect(50, yPos - 5, 495, 28).fill('#f1f5f9');
             doc.fillColor('#1e293b');
-            doc.text('#' + (i+1), 55, yPos);
-            doc.text(r.titulo, 130, yPos);
-            doc.fillColor('#f59e0b').font('Helvetica-Bold').text(r.total.toString(), 450, yPos, { width: 85, align: 'right' });
+            doc.text('#' + (i+1), 55, yPos, { lineBreak: false });
+            doc.text(limitTitulo, 130, yPos, { lineBreak: false });
+            doc.fillColor('#f59e0b').font('Helvetica-Bold').text(r.total.toString(), 450, yPos, { width: 85, align: 'right', lineBreak: false });
             doc.font('Helvetica');
             yPos += 28;
         });
 
+        // Detener la creación de páginas nuevas automáticas por si quedamos cerca del borde
+        doc.x = 50; 
+        doc.y = yPos;
+
         // --- FOOTER ---
-        doc.moveDown(2);
-        doc.fillColor('#94a3b8').fontSize(10).text('Simulador de Entrevistas - Reporte Generado Automáticamente', { align: 'center' });
+        doc.fillColor('#94a3b8').fontSize(10)
+           .text('Simulador de Entrevistas - Reporte Generado Automáticamente', 50, 780, { align: 'center', width: 495, lineBreak: false });
 
         doc.end();
     } catch (error) {

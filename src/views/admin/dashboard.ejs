@@ -10,7 +10,17 @@
 <body>
     <%- include('partials/sidebar') %>
     <main class="admin-content">
-        <h1>Dashboard General</h1>
+        <div style="background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%); padding: 20px 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-left: 5px solid #3b82f6; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h1 style="margin: 0; color: #fff; font-size: 24px;">¡Bienvenido, <span style="color: #3b82f6;"><%= userName || 'Administrador' %></span>! 👋</h1>
+                <p style="margin: 5px 0 0 0; color: #94a3b8; font-size: 14px;">Aquí tienes un resumen general del rendimiento del simulador.</p>
+            </div>
+            <div style="font-size: 2rem;">
+                👑
+            </div>
+        </div>
+
+        <h2>Dashboard General</h2>
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Usuarios</h3>
