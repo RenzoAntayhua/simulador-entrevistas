@@ -40,7 +40,7 @@
     </div>
 
     <div class="batalla-layout">
-        <div class="batalla-panel">
+        <div class="batalla-panel glass-effect">
             <h2><%= reto.titulo %></h2>
             <p style="font-size: 16px; color: #ccc;"><%= reto.enunciado %></p>
             <hr style="border-color: #333; margin: 20px 0;">
@@ -57,15 +57,20 @@
             </div>
         </div>
         
-        <div class="editor-container">
-            <textarea id="codeEditor" class="code-area"><%= reto.codigo_inicial %></textarea>
-            <button class="btn btn-run" onclick="runCode()" id="btnRun" disabled>Esperando inicio...</button>
-            <div id="consoleOutput" class="console">>_ Esperando ejecución...</div>
+        <div class="editor-container" style="display: flex; flex-direction: column; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0;">Tu Código</h3>
+                <button class="btn btn-run" onclick="runCode()" id="btnRun" disabled>Esperando inicio...</button>
+            </div>
+            <div id="editor-container-monaco" style="flex: 1; min-height: 300px; border-radius: 8px; overflow: hidden; border: 1px solid #1c1c1c; margin-bottom: 10px;"></div>
+            <div id="consoleOutput" class="console" style="margin-top: 0; min-height: 120px;">>_ Esperando ejecución...</div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/loader.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        const rawInitialCode = <%- JSON.stringify(reto.codigo_inicial || '') %>;
         const socket = io();
         const codigo = '<%= sala.codigo %>';
         const usuario = { id: <%= userId %>, nombre: '<%= userName %>' };
@@ -89,7 +94,7 @@
         });
         
         socket.on('oponente-rechazo', () => {
-            alert('El oponente ha rechazado tu desafío.');
+            showToast('El oponente ha rechazado tu desafío.', 'error');
             document.getElementById('estado-oponente').textContent = 'Rechazado';
             document.getElementById('estado-oponente').style.color = '#ef4444';
         });
@@ -147,8 +152,8 @@
         }
         
         function onTiempoAgotado() {
-            alert('¡Tiempo Agotado!');
-            window.location.href = '/batalla';
+            showToast('¡Tiempo Agotado!', 'warning');
+            setTimeout(() => { window.location.href = '/batalla'; }, 2000);
         }
 
         function onRetoCompletado() {
@@ -157,13 +162,15 @@
 
         async function runCode() {
             if (!batallaActiva) return;
-            const code = document.getElementById('codeEditor').value;
+            const code = window.editor.getValue();
             const consoleDiv = document.getElementById('consoleOutput');
             const btnRun = document.getElementById('btnRun');
             
             socket.emit('evaluando-codigo', { codigo });
             consoleDiv.innerHTML = ">_ Evaluando código...\n";
             btnRun.disabled = true;
+            btnRun.classList.add('loading');
+            consoleDiv.classList.add('skeleton-loading');
             
             const testsToRun = <%- JSON.stringify(casosPrueba || []) %>;
             let allTestsPassed = true;
@@ -221,7 +228,41 @@
                 consoleDiv.innerHTML += `❌ Error de conexión al evaluar.\n`;
             }
             btnRun.disabled = false;
+            btnRun.classList.remove('loading');
+            consoleDiv.classList.remove('skeleton-loading');
         }
+
+        // --- INICIALIZAR MONACO EDITOR ---
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            const languageMap = {
+                "JavaScript": "javascript",
+                "Python": "python",
+                "Java": "java",
+                "C++": "cpp",
+                "C#": "csharp"
+            };
+            const lang = languageMap["<%= reto.lenguaje %>"] || "javascript";
+
+            const initialTheme = localStorage.getItem('theme') === 'light' ? 'vs' : 'vs-dark';
+
+            window.editor = monaco.editor.create(document.getElementById('editor-container-monaco'), {
+                value: rawInitialCode,
+                language: lang,
+                theme: initialTheme,
+                automaticLayout: true,
+                minimap: { enabled: true },
+                fontSize: 14,
+                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                roundedSelection: true,
+                scrollBeyondLastLine: false,
+                padding: { top: 16 }
+            });
+
+            window.addEventListener('themeChanged', (e) => {
+                monaco.editor.setTheme(e.detail.isLight ? 'vs' : 'vs-dark');
+            });
+        });
     </script>
 </body>
 </html>

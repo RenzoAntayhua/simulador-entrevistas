@@ -1,3 +1,14 @@
+<!-- Script inicial para prevenir flash de colores -->
+<script>
+    if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.add('light-theme');
+        document.body && document.body.classList.add('light-theme');
+    }
+</script>
+<button id="themeToggleBtn" class="theme-floating-btn">
+    <span id="themeIcon">☀️</span> Modo Claro
+</button>
+
 <nav>
     <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; gap: 10px;">
         <img src="/img/logo.png" alt="Logo" style="width: 100px; height: auto; object-fit: contain;">
@@ -11,11 +22,38 @@
         <a href="/usuarios" class="btn-crear">Usuarios</a>
         <a href="/amigos" class="btn-crear">Amigos</a>
         <a href="/certificados" class="btn-crear">Certificados</a>
-        <a href="/bancos/crear" class="btn-crear">+ Crear Banco</a>
-        <a href="/retos/crear" class="btn-crear">+ Crear Reto</a>
+        <a href="#" onclick="openModal('tpl-crear-banco'); return false;" class="btn-crear">+ Crear Banco</a>
+        <a href="#" onclick="openModal('tpl-crear-reto'); return false;" class="btn-crear">+ Crear Reto</a>
+
         <a href="/logout" class="btn-logout">Cerrar Sesión</a>
     </div>
 </nav>
+
+<script>
+    // Lógica para inicializar el tema después de que el body cargue
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-theme');
+        const btnText = document.getElementById('themeToggleBtn');
+        if (btnText) btnText.innerHTML = '🌙 Modo Oscuro';
+    }
+
+    document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
+        const isLight = document.body.classList.toggle('light-theme');
+        document.documentElement.classList.toggle('light-theme', isLight);
+        
+        const btnText = document.getElementById('themeToggleBtn');
+        if (isLight) {
+            localStorage.setItem('theme', 'light');
+            btnText.innerHTML = '🌙 Modo Oscuro';
+        } else {
+            localStorage.setItem('theme', 'dark');
+            btnText.innerHTML = '☀️ Modo Claro';
+        }
+
+        // Emitir un evento global por si hay un editor Monaco en la vista
+        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isLight } }));
+    });
+</script>
 
 <!-- Lógica Global de Socket.io para rastreo de usuarios conectados -->
 <script src="/socket.io/socket.io.js"></script>
@@ -26,11 +64,51 @@
         globalSocket.emit('usuario-conectado', { nombre: '<%= userName %>', id: '<%= userId %>' });
 
         globalSocket.on('invitacion-recibida', (data) => {
-            if (confirm(`⚔️ ¡${data.retador} te ha desafiado a una batalla de código!\nReto: "${data.reto}"\n\n¿Aceptas el reto?`)) {
-                window.location.href = `/batalla/${data.codigo}`;
+            const mensaje = `¡<b>${data.retador}</b> te ha desafiado a una batalla de código!<br><br>Reto: <b>"${data.reto}"</b><br><br>¿Aceptas el reto?`;
+            
+            if (typeof showConfirmModal === 'function') {
+                showConfirmModal(mensaje, 
+                    () => { window.location.href = `/batalla/${data.codigo}`; },
+                    () => { globalSocket.emit('invitacion-rechazada', { codigo: data.codigo }); }
+                );
             } else {
-                globalSocket.emit('invitacion-rechazada', { codigo: data.codigo });
+                if (confirm(`¡${data.retador} te ha desafiado!\nReto: "${data.reto}"\n¿Aceptas?`)) {
+                    window.location.href = `/batalla/${data.codigo}`;
+                } else {
+                    globalSocket.emit('invitacion-rechazada', { codigo: data.codigo });
+                }
             }
         });
     <% } %>
 </script>
+
+<!-- TOAST NOTIFICATIONS -->
+<div id="toast-container"></div>
+<script>
+    window.showToast = function(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = 'ℹ️';
+        if (type === 'success') icon = '✅';
+        if (type === 'error') icon = '❌';
+        if (type === 'warning') icon = '⚠️';
+        
+        toast.innerHTML = `<span style="font-size: 18px;">${icon}</span> <span>${message}</span>`;
+        container.appendChild(toast);
+        
+        // Trigger reflow
+        void toast.offsetWidth;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400); // wait for transition
+        }, 3500);
+    };
+</script>
+
+<%- include('modals') %>

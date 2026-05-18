@@ -34,7 +34,7 @@
     <div class="container">
         <div class="editor-container">
             <div class="left-panel">
-                <div class="card banco-detalles">
+                <div class="card banco-detalles glass-effect">
                     <a href="/retos" class="btn-volver">← Volver a Retos</a>
                     
                     <div class="header-meta">
@@ -94,7 +94,7 @@
                     </div>
                 </div>
 
-                <div class="leaderboard">
+                <div class="leaderboard glass-effect" style="padding: 20px; border-radius: 10px; border: 1px solid #1c1c1c; margin-top: 20px;">
                     <h3>🎖️ Top 5 Soluciones Exitosas</h3>
                     <ul>
                         <% if(leaderboard.length === 0) { %>
@@ -111,18 +111,23 @@
                     <span style="font-weight: bold; color: #f1f1f1; font-size: 0.9em;">⏱️ Tiempo Restante:</span>
                     <span id="countdown" style="font-family: monospace; font-size: 1.4em; color: #22c55e; font-weight: bold; letter-spacing: 1px;">--:--</span>
                 </div>
-                <h3>Tu Código (<%= reto.lenguaje %>)</h3>
-                <textarea id="codeEditor" class="code-area"><%= reto.codigo_inicial %></textarea>
-                
-                <div class="btn-group">
-                    <button class="btn-run" onclick="runCode()">▶ Ejecutar Pruebas</button>
-                    <button class="btn-reset" onclick="resetCode()">🔄 Resetear código</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0;">Tu Código (<%= reto.lenguaje %>)</h3>
+                    <div class="btn-group" style="margin: 0;">
+                        <button class="btn-run" onclick="runCode()">▶ Ejecutar Pruebas</button>
+                        <button class="btn-reset" onclick="resetCode()">🔄 Resetear</button>
+                    </div>
                 </div>
+                <!-- Contenedor de Monaco Editor -->
+                <div id="editor-container" style="flex: 1; min-height: 350px;"></div>
 
-                <div id="consoleOutput" class="console">>_ Esperando ejecución...</div>
+                <div id="consoleOutput" class="console" style="margin-top: 10px; min-height: 120px;">>_ Esperando ejecución...</div>
             </div>
         </div>
     </div>
+
+    <!-- Scripts de Monaco Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/loader.min.js"></script>
 
     <!-- Lógica de ejecución evaluador múltiple -->
     <script>
@@ -145,13 +150,13 @@
                 countdownEl.innerText = "00:00";
                 
                 // Bloquear UI
-                document.getElementById('codeEditor').disabled = true;
+                window.editor.updateOptions({ readOnly: true });
                 const runBtn = document.querySelector('.btn-run');
                 if (runBtn) { runBtn.disabled = true; runBtn.style.opacity = '0.5'; }
                 
                 // Mostrar alerta y redirigir
                 setTimeout(() => {
-                    alert('⏰ ¡Tiempo agotado! No pudiste resolver el reto a tiempo.');
+                    showToast('⏰ ¡Tiempo agotado! No pudiste resolver el reto a tiempo.', 'warning');
                     setTimeout(() => {
                         window.location.href = '/retos';
                     }, 3000);
@@ -189,156 +194,89 @@
 
         function resetCode() {
             if (confirm("¿Estás seguro que deseas restablecer tu código? Perderás los cambios manuales.")) {
-                document.getElementById('codeEditor').value = rawInitialCode;
+                window.editor.setValue(rawInitialCode);
                 document.getElementById('consoleOutput').innerHTML = ">_ Código restablecido.\n";
             }
         }
 
         async function runCode() {
-            const code = document.getElementById('codeEditor').value;
+            const code = window.editor.getValue();
             const consoleDiv = document.getElementById('consoleOutput');
             const btnRun = document.querySelector('.btn-run');
             
-            consoleDiv.innerHTML = ">_ Enviando a Judge0 para evaluación...\n";
+            consoleDiv.innerHTML = ">_ Enviando código al servidor para evaluación segura...\n";
+            
+            // Iniciar animaciones de carga
             btnRun.disabled = true;
-
-            let allTestsPassed = true;
-            let testsToRun = [];
-
-            // Usamos la tabla nueva de casos si existe para el reto
-            if (casosPrueba && casosPrueba.length > 0) {
-                testsToRun = casosPrueba;
-            } else if (defaultInput) {
-                testsToRun = [{ input: defaultInput, output_esperado: defaultOutput, es_visible: 1 }];
-            }
-
-            if (testsToRun.length === 0) {
-                consoleDiv.innerHTML += "\n⚠️ No hay casos de prueba definidos en la base de datos para evaluar.";
-                btnRun.disabled = false;
-                return;
-            }
-
-            const lenguajeNombre = "<%= reto.lenguaje %>";
-            const lenguajesIds = {
-                "JavaScript": 63,
-                "Python": 71,
-                "Java": 62,
-                "C++": 54,
-                "C#": 51
-            };
-            const language_id = lenguajesIds[lenguajeNombre] || 63;
-
-            let executionOutput = "\n--- RESULTADOS ---\n";
-            let visibleCount = 1;
-            let hiddenCount = 1;
-
-            const globalStart = performance.now();
+            btnRun.classList.add('loading');
+            consoleDiv.classList.add('skeleton-loading');
 
             try {
-                // Iteramos TODOS los casos con Judge0 CE
-                for (const test of testsToRun) {
-                    let source_code = code;
-
-                    // Envolver código según lenguaje
-                    if (language_id === 62) { // Java
-                        source_code = `import java.util.Scanner;\npublic class Main {\n${code}\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if(scanner.hasNextLine()){\n            String input = scanner.nextLine();\n            System.out.println(solucion(input));\n        }\n    }\n}`;
-                    } else if (language_id === 71) { // Python
-                        source_code = `${code}\nimport sys\nimport ast\ntry:\n    args = ast.literal_eval('[' + sys.stdin.read().strip() + ']')\nexcept:\n    args = eval('[' + sys.stdin.read().strip().replace('true', 'True').replace('false', 'False') + ']')\nprint(solucion(*args))`;
-                    } else if (language_id === 63) { // JavaScript
-                        source_code = `${code}\nconst fs = require('fs');\nconst input = fs.readFileSync(0, 'utf-8').trim();\nlet args;\ntry { args = eval('[' + input + ']'); } catch(e) { args = [input]; }\nconsole.log(solucion(...args));`;
-                    } else if (language_id === 54) { // C++
-                        source_code = `#include <iostream>\nusing namespace std;\n${source_code}\nint main() {\n    int n;\n    cin >> n;\n    cout << (solucion(n) ? "true" : "false") << endl;\n    return 0;\n}`;
-                    }
-
-                    const response = await fetch('https://ce.judge0.com/submissions?wait=true', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            source_code: source_code,
-                            language_id: language_id,
-                            stdin: test.input
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (!data || !data.status) {
-                        throw new Error('Judge0 no devolvió respuesta válida');
-                    }
-
-                    if (data.status.id !== 3) { // No Accepted (3)
-                        allTestsPassed = false;
-                        let errStr = data.compile_output || data.stderr || data.status.description;
-                        if (test.es_visible === 1) {
-                            executionOutput += `❌ Test Visible ${visibleCount} falló: ${errStr}\n`;
-                            visibleCount++;
-                        } else {
-                            executionOutput += `❌ Test Oculto ${hiddenCount} falló en ejecución.\n`;
-                            hiddenCount++;
-                        }
-                        continue;
-                    }
-
-                    // Limpiar stdout y esperado antes de comparar
-                    let stdoutClear = (data.stdout || '').replace(/\\/g, '').replace(/"/g, '').trim();
-                    let expectedClear = (test.output_esperado || '').replace(/\\/g, '').replace(/"/g, '').trim();
-
-                    const isMatch = stdoutClear === expectedClear;
-
-                    if (!isMatch) {
-                        allTestsPassed = false;
-                    }
-
-                    if (test.es_visible === 1) {
-                        const icon = isMatch ? "✅" : "❌";
-                        executionOutput += `${icon} Test ${visibleCount}: Input: ${test.input} | Esperado: ${test.output_esperado} | Obtenido: ${data.stdout ? data.stdout.trim() : 'Vacío'}\n`;
-                        visibleCount++;
-                    } else {
-                        if (!isMatch) {
-                            executionOutput += `❌ Test Oculto ${hiddenCount} falló.\n`;
-                        }
-                        hiddenCount++;
-                    }
-                }
-
-                const globalEnd = performance.now();
-                const totalTime = (globalEnd - globalStart).toFixed(2);
-
-                consoleDiv.innerHTML += executionOutput;
-
-                if (allTestsPassed) {
-                    consoleDiv.innerHTML += `\n🎉 ¡EL CÓDIGO PASÓ TODAS LAS PRUEBAS! (${totalTime}ms) 🎉\n`;
-                } else {
-                    consoleDiv.innerHTML += `\n⚠️ Fallaste algunas pruebas. Revisa tu intento.\n`;
-                }
-
-                // POST asíncrono para registrar el intento
-                await fetch('/retos/enviar', {
+                const response = await fetch('/retos/evaluar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         reto_id: retoId,
-                        codigo: code,
-                        resultado: allTestsPassed ? 'Exitoso' : 'Fallido'
+                        codigo: code
                     })
                 });
 
-                if (allTestsPassed) {
-                    setTimeout(() => { window.location.reload(); }, 2000);
-                }
+                const result = await response.json();
 
+                if (result.error) {
+                    consoleDiv.innerHTML += `\n❌ ERROR: ${result.error}\n`;
+                    if (result.details) consoleDiv.innerHTML += `Detalles: ${result.details}\n`;
+                } else {
+                    consoleDiv.innerHTML += result.executionOutput;
+                    
+                    if (result.allTestsPassed) {
+                        setTimeout(() => { window.location.reload(); }, 2000);
+                    }
+                }
             } catch (err) {
-                consoleDiv.innerHTML += `\n❌ ERROR AL COMUNICARSE CON JUDGE0:\n${err.message}`;
-                
-                await fetch('/retos/enviar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reto_id: retoId, codigo: code, resultado: 'Fallido' })
-                });
+                consoleDiv.innerHTML += `\n❌ ERROR AL COMUNICARSE CON EL SERVIDOR:\n${err.message}`;
             } finally {
+                // Detener animaciones
                 btnRun.disabled = false;
+                btnRun.classList.remove('loading');
+                consoleDiv.classList.remove('skeleton-loading');
             }
         }
+
+        // --- INICIALIZAR MONACO EDITOR ---
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            
+            // Mapeo simple de lenguajes para Monaco
+            const languageMap = {
+                "JavaScript": "javascript",
+                "Python": "python",
+                "Java": "java",
+                "C++": "cpp",
+                "C#": "csharp"
+            };
+            const lang = languageMap["<%= reto.lenguaje %>"] || "javascript";
+
+            const initialTheme = localStorage.getItem('theme') === 'light' ? 'vs' : 'vs-dark';
+
+            window.editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: rawInitialCode,
+                language: lang,
+                theme: initialTheme,
+                automaticLayout: true,
+                minimap: { enabled: true },
+                fontSize: 14,
+                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                roundedSelection: true,
+                scrollBeyondLastLine: false,
+                padding: { top: 16 }
+            });
+
+            // Escuchar cambios de tema globales
+            window.addEventListener('themeChanged', (e) => {
+                monaco.editor.setTheme(e.detail.isLight ? 'vs' : 'vs-dark');
+            });
+        });
     </script>
 </body>
 </html>

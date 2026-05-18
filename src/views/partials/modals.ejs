@@ -1,0 +1,232 @@
+<style>
+    /* Estilos del Modal Universal */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .modal-content {
+        background: var(--light-bg, #16161a);
+        padding: 30px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .modal-overlay.active .modal-content {
+        transform: translateY(0);
+    }
+    .close-modal {
+        position: absolute;
+        top: 15px; right: 20px;
+        font-size: 24px;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .close-modal:hover { color: #fff; }
+    
+    /* Adaptación para Light Theme */
+    body.light-theme .modal-overlay {
+        background: rgba(255, 255, 255, 0.4);
+    }
+    body.light-theme .modal-content {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    body.light-theme .close-modal { color: #64748b; }
+    body.light-theme .close-modal:hover { color: #0f172a; }
+</style>
+
+<div id="universal-modal-overlay" class="modal-overlay">
+    <div class="modal-content glass-effect">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<!-- Plantillas Ocultas para los Modales -->
+<template id="tpl-crear-banco">
+    <h2 style="margin-bottom: 1.5rem; color: var(--primary, #6366f1);">Nuevo Banco de Preguntas</h2>
+    <form id="ajax-form-crear-banco" action="/bancos/crear" method="POST" onsubmit="handleAjaxForm(event)">
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Título del Banco:</label>
+            <input type="text" name="titulo" class="form-control" placeholder="Ej: Entrevista Técnica de Node.js" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Descripción:</label>
+            <textarea name="descripcion" class="form-control" placeholder="Breve descripción del tema a evaluar..." style="min-height: 80px; resize: vertical;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>Categoría Técnica:</label>
+            <input type="text" name="categoria" class="form-control" placeholder="Ej: Desarrollo Web, Bases de Datos, DevOps..." required>
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">Crear Simulador</button>
+    </form>
+</template>
+
+<template id="tpl-crear-reto">
+    <h2 style="margin-bottom: 1.5rem; color: var(--primary, #6366f1);">Nuevo Reto de Código</h2>
+    <form id="ajax-form-crear-reto" action="/retos/crear" method="POST" onsubmit="handleAjaxForm(event)">
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Título del Reto</label>
+            <input type="text" name="titulo" class="form-control" required placeholder="Ej: Palíndromos Recursivos">
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Enunciado (Instrucciones)</label>
+            <textarea name="enunciado" class="form-control" rows="3" required placeholder="Explica claramente lo que el usuario debe hacer..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Código Inicial (Plantilla)</label>
+            <textarea name="codigo_inicial" class="form-control" rows="3" placeholder="function solucion(param) { ... }"></textarea>
+        </div>
+        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <div class="form-group" style="flex:1;">
+                <label>Dificultad</label>
+                <select name="dificultad" class="form-control" required>
+                    <option value="Fácil">Fácil</option>
+                    <option value="Medio">Medio</option>
+                    <option value="Difícil">Difícil</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Lenguaje</label>
+                <select name="lenguaje" class="form-control" required>
+                    <option value="JavaScript">JavaScript</option>
+                    <option value="Python">Python</option>
+                    <option value="Java">Java</option>
+                    <option value="C++">C++</option>
+                    <option value="C#">C#</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label>Pista (Opcional)</label>
+            <input type="text" name="pista" class="form-control" placeholder="Ej: Intenta usar el método split() y reverse().">
+        </div>
+        <hr style="margin: 15px 0; border-color: #333;">
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>Casos de Prueba Básicos (2 mínimos requeridos)</label>
+            <div id="modal-casos-container" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                <div class="caso-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" name="casos_input" class="form-control" required placeholder='Input: "hola"'>
+                    <input type="text" name="casos_output" class="form-control" required placeholder='Output: "aloh"'>
+                    <input type="hidden" name="casos_visible" value="1">
+                </div>
+                <div class="caso-row" style="display: flex; gap: 10px;">
+                    <input type="text" name="casos_input" class="form-control" required placeholder='Input: "sol"'>
+                    <input type="text" name="casos_output" class="form-control" required placeholder='Output: "los"'>
+                    <input type="hidden" name="casos_visible" value="0">
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">Guardar Reto</button>
+    </form>
+</template>
+
+<template id="tpl-confirm-modal">
+    <div style="text-align: center; padding: 10px;">
+        <h3 style="color: var(--primary, #6366f1); font-size: 20px; margin-bottom: 15px;">⚔️ Nueva Notificación</h3>
+        <p id="confirm-message" style="font-size: 15px; margin-bottom: 25px; line-height: 1.5;"></p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button id="btn-confirm-accept" class="btn" style="flex: 1; font-size: 15px;">Aceptar</button>
+            <button id="btn-confirm-cancel" class="btn-secondary" style="flex: 1; font-size: 15px;">Rechazar</button>
+        </div>
+    </div>
+</template>
+
+<script>
+    function openModal(templateId) {
+        const template = document.getElementById(templateId);
+        const modalBody = document.getElementById('modal-body');
+        const overlay = document.getElementById('universal-modal-overlay');
+        
+        if(template) {
+            modalBody.innerHTML = template.innerHTML;
+            overlay.classList.add('active');
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('universal-modal-overlay').classList.remove('active');
+    }
+
+    function showConfirmModal(message, onAccept, onCancel) {
+        const template = document.getElementById('tpl-confirm-modal');
+        const modalBody = document.getElementById('modal-body');
+        const overlay = document.getElementById('universal-modal-overlay');
+        
+        if (template) {
+            modalBody.innerHTML = template.innerHTML;
+            document.getElementById('confirm-message').innerHTML = message.replace(/\n/g, '<br>');
+            
+            document.getElementById('btn-confirm-accept').onclick = () => {
+                closeModal();
+                if(onAccept) onAccept();
+            };
+            
+            document.getElementById('btn-confirm-cancel').onclick = () => {
+                closeModal();
+                if(onCancel) onCancel();
+            };
+            
+            overlay.classList.add('active');
+        }
+    }
+
+    async function handleAjaxForm(event) {
+        event.preventDefault();
+        const form = event.target;
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = 'Procesando...';
+        btn.disabled = true;
+        btn.classList.add('loading');
+
+        try {
+            const formData = new URLSearchParams(new FormData(form));
+            const response = await fetch(form.action, {
+                method: form.method,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+
+            if(response.redirected) {
+                // El servidor respondió con un redirect (éxito)
+                window.location.href = response.url;
+            } else if(response.ok) {
+                window.location.reload();
+            } else {
+                showToast("Hubo un error al guardar.", "error");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            }
+        } catch(error) {
+            showToast("Error de conexión.", "error");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.classList.remove('loading');
+        }
+    }
+</script>
