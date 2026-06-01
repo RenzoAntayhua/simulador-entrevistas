@@ -5,39 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lobby de Batallas - Simulador</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .lobby-layout     { display: flex; gap: 30px; flex-wrap: wrap; }
+        .lobby-salas      { flex: 2; min-width: 300px; }
+        .lobby-crear      { flex: 1; min-width: 300px; background: #16161a; padding: 20px; border-radius: 10px; height: fit-content; border: 1px solid #2a2a35; transition: background 0.3s, border-color 0.3s; }
+        .sala-card        { background: #1a1a2e; padding: 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2a2a35; flex-wrap: wrap; gap: 15px; margin-bottom: 12px; transition: background 0.3s, border-color 0.3s; }
+        .sala-card:hover  { border-color: #6366f1; }
+        .sala-titulo      { font-size: 17px; font-weight: 600; color: #6366f1; margin-bottom: 4px; }
+        .sala-meta        { margin: 0; color: #888; font-size: 13px; }
+        .salas-empty      { background: #111; padding: 30px; text-align: center; border-radius: 10px; transition: background 0.3s; }
+        .salas-grid       { display: grid; gap: 12px; }
+        .btn-unirse       { background: #22c55e; white-space: nowrap; }
+        .btn-unirse:hover { background: #16a34a; }
+
+        /* Light theme */
+        body.light-theme .lobby-crear      { background: #ffffff; border-color: #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        body.light-theme .sala-card        { background: #ffffff; border-color: #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+        body.light-theme .sala-card:hover  { border-color: #c7d2fe; }
+        body.light-theme .sala-meta        { color: #64748b; }
+        body.light-theme .salas-empty      { background: #f1f5f9; border: 1px solid #e2e8f0; }
+        body.light-theme .salas-empty p    { color: #64748b; }
+    </style>
 </head>
 <body>
     <%- include('../partials/header') %>
     <div class="container">
         <h2 style="text-align: center; margin-bottom: 30px;">⚔️ Lobby de Batallas 1v1</h2>
         
-        <div style="display: flex; gap: 30px; flex-wrap: wrap;">
-            <div style="flex: 2; min-width: 300px;">
+        <div class="lobby-layout">
+            <div class="lobby-salas">
                 <h3>Salas Esperando Oponente</h3>
                 <% if (salas && salas.length > 0) { %>
-                    <div style="display: grid; gap: 15px;">
+                    <div class="salas-grid">
                         <% salas.forEach(s => { %>
-                            <div style="background: #1a1a2e; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2a2a4a; flex-wrap: wrap; gap: 15px;">
+                            <div class="sala-card">
                                 <div style="flex: 1; min-width: 200px;">
-                                    <strong style="font-size: 18px; color: #6366f1;">Reto: <%= s.reto_titulo %></strong>
-                                    <p style="margin: 5px 0; color: #888;">Creador: <%= s.creador_nombre %> - Dificultad: <span class="badge badge-<%= s.dificultad.replace('í', 'i') %>"><%= s.dificultad %></span></p>
+                                    <div class="sala-titulo">Reto: <%= s.reto_titulo %></div>
+                                    <p class="sala-meta">Creador: <%= s.creador_nombre %> — Dificultad: <span class="badge badge-<%= s.dificultad.replace('í', 'i') %>"><%= s.dificultad %></span></p>
                                 </div>
-                                <a href="/batalla/<%= s.codigo %>" class="btn" style="background: #22c55e; white-space: nowrap;">Unirse a Batalla</a>
+                                <a href="/batalla/<%= s.codigo %>" class="btn btn-unirse">Unirse a Batalla</a>
                             </div>
                         <% }) %>
                     </div>
                 <% } else { %>
-                    <div style="background: #111; padding: 30px; text-align: center; border-radius: 8px;">
+                    <div class="salas-empty">
                         <p>No hay salas activas esperando oponente. ¡Crea la tuya!</p>
                     </div>
                 <% } %>
             </div>
             
-            <div style="flex: 1; min-width: 300px; background: #16161a; padding: 20px; border-radius: 8px; height: fit-content; border: 1px solid #2a2a35;">
+            <div class="lobby-crear">
                 <h3>Crear Sala de Batalla</h3>
                 <form action="/batalla/crear" method="POST">
                     <label style="display: block; margin-bottom: 10px;">Selecciona un Reto:</label>
-                    <select name="reto_id" class="input" style="margin-bottom: 20px; width: 100%;" required>
+                    <select name="reto_id" class="form-control" style="margin-bottom: 20px;" required>
                         <option value="">-- Elige un reto --</option>
                         <% retos.forEach(r => { %>
                             <option value="<%= r.id %>"><%= r.titulo %> (<%= r.dificultad %>)</option>

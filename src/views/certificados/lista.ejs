@@ -5,6 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Certificados - Simulador</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Grid de certificados */
+        .certs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        /* Card de certificado */
+        .cert-card {
+            background: linear-gradient(145deg, #16161a, #0d0d0f);
+            border: 1px solid #ffd700;
+            border-radius: 14px;
+            padding: 28px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.12);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cert-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 28px rgba(255, 215, 0, 0.2);
+        }
+        .cert-icon  { font-size: 42px; margin-bottom: 12px; }
+        .cert-title { color: #ffd700; margin: 0 0 10px; font-size: 1.1rem; font-weight: 700; }
+        .cert-reto  { color: #e2e8f0; font-size: 14px; margin-bottom: 4px; }
+        .cert-oponente { color: #94a3b8; font-size: 13px; margin-bottom: 4px; }
+        .cert-fecha    { font-size: 11px; color: #64748b; margin-top: 6px; }
+
+        /* Share buttons */
+        .share-container { display: flex; gap: 10px; margin-top: 16px; position: relative; flex-wrap: wrap; }
+        .share-menu {
+            display: none;
+            position: absolute;
+            bottom: 54px;
+            right: 0;
+            background: #1c1c24;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+            z-index: 100;
+            text-align: left;
+            min-width: 160px;
+        }
+        .share-menu a { color: #e4e4e7; text-decoration: none; padding: 6px 8px; border-radius: 6px; font-size: 13px; display: flex; align-items: center; gap: 8px; transition: background 0.15s; }
+        .share-menu a:hover { background: rgba(255,255,255,0.07); }
+
+        /* Estado vacío */
+        .certs-empty {
+            text-align: center;
+            padding: 60px 30px;
+            background: #111;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        .certs-empty-icon { font-size: 60px; display: block; margin-bottom: 16px; }
+        .certs-empty p { color: #94a3b8; }
+
+        /* ——— Light theme ——— */
+        body.light-theme .cert-card {
+            background: linear-gradient(145deg, #fffbeb, #fefce8);
+            border-color: #d97706;
+            box-shadow: 0 4px 20px rgba(217, 119, 6, 0.12);
+        }
+        body.light-theme .cert-card:hover { box-shadow: 0 8px 28px rgba(217,119,6,0.22); }
+        body.light-theme .cert-title   { color: #92400e; }
+        body.light-theme .cert-reto    { color: #1e293b; }
+        body.light-theme .cert-oponente{ color: #64748b; }
+        body.light-theme .cert-fecha   { color: #94a3b8; }
+        body.light-theme .share-menu {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        body.light-theme .share-menu a { color: #1e293b; }
+        body.light-theme .share-menu a:hover { background: #f1f5f9; }
+        body.light-theme .certs-empty {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+        body.light-theme .certs-empty h3 { color: #0f172a; }
+        body.light-theme .certs-empty p  { color: #64748b; }
+    </style>
 </head>
 <body>
     <%- include('../partials/header') %>
@@ -31,25 +116,18 @@
                 const text = encodeURIComponent('¡He demostrado mis habilidades técnicas en TechSim Solutions! Mira mi certificado:');
                 
                 if (network === 'linkedin') {
-                    // LinkedIn ya no permite pre-llenar texto por URL por políticas anti-spam.
-                    // El truco profesional es copiar el texto ideal al portapapeles y luego abrir LinkedIn.
                     const linkedinText = `¡Emocionado de compartir que acabo de superar una evaluación técnica oficial de ingeniería de software validada por TechSim Solutions! 🚀💻\n\nPuedes verificar mis competencias y mi certificado oficial en el siguiente enlace:\n${baseUrl}\n\n#TechSimSolutions #SoftwareEngineering #CodingChallenge #Certificacion`;
-                    
                     navigator.clipboard.writeText(linkedinText).then(() => {
                         alert('¡Texto profesional copiado al portapapeles!\n\nSolo presiona "Pegar" (Ctrl+V) cuando se abra la ventana de LinkedIn para publicar tu logro.');
                         window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=800,height=600');
                     });
-                    return; // Salir de la función aquí para LinkedIn
+                    return;
                 }
                 
                 let shareUrl = '';
-                if (network === 'whatsapp') {
-                    shareUrl = `https://api.whatsapp.com/send?text=${text}%20${url}`;
-                } else if (network === 'telegram') {
-                    shareUrl = `https://t.me/share/url?url=${url}&text=${text}`;
-                } else if (network === 'facebook') {
-                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-                }
+                if (network === 'whatsapp')  shareUrl = `https://api.whatsapp.com/send?text=${text}%20${url}`;
+                else if (network === 'telegram') shareUrl = `https://t.me/share/url?url=${url}&text=${text}`;
+                else if (network === 'facebook') shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
                 
                 window.open(shareUrl, '_blank', 'width=600,height=400');
             }
@@ -62,36 +140,35 @@
         </script>
         
         <% if (certificados && certificados.length > 0) { %>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            <div class="certs-grid">
                 <% certificados.forEach(c => { %>
-                    <div style="background: linear-gradient(145deg, #16161a, #0d0d0f); border: 1px solid #ffd700; border-radius: 10px; padding: 25px; text-align: center; box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);">
-                        <div style="font-size: 40px; margin-bottom: 10px;">📜</div>
-                        <h3 style="color: #ffd700; margin: 0 0 10px 0;">Victorioso</h3>
-                        <p><strong>Reto:</strong> <%= c.reto_titulo %></p>
-                        <p style="color: #888; font-size: 14px;">Derrotaste a: <%= c.oponente_nombre %></p>
-                        <p style="font-size: 12px; color: #555; margin-top: 5px;">Fecha: <%= new Date(c.fecha).toLocaleDateString() %></p>
+                    <div class="cert-card">
+                        <div class="cert-icon">📜</div>
+                        <h3 class="cert-title">Victorioso</h3>
+                        <p class="cert-reto"><strong>Reto:</strong> <%= c.reto_titulo %></p>
+                        <p class="cert-oponente">Derrotaste a: <%= c.oponente_nombre %></p>
+                        <p class="cert-fecha">Fecha: <%= new Date(c.fecha).toLocaleDateString() %></p>
                         
-                        <div class="share-container" style="display: flex; gap: 10px; margin-top: 15px; position: relative; flex-wrap: wrap;">
+                        <div class="share-container">
                             <a href="/certificados/<%= c.id %>/pdf" target="_blank" class="btn" style="background: #eab308; color: #000; flex: 1; white-space: nowrap; text-align: center;">⬇️ PDF</a>
-                            <button onclick="copiarEnlace('<%= c.id %>')" class="btn" style="background: #6366f1; flex: 1; white-space: nowrap;">🔗 Copiar</button>
-                            
+                            <button onclick="copiarEnlace('<%= c.id %>')" class="btn" style="flex: 1; white-space: nowrap;">🔗 Copiar</button>
                             <button onclick="toggleShareMenu('<%= c.id %>')" class="btn" style="background: #2a2a35; padding: 10px 15px;">⋮</button>
                             
-                            <div id="share-menu-<%= c.id %>" style="display: none; position: absolute; bottom: 50px; right: 0; background: #1c1c24; border: 1px solid #333; border-radius: 8px; padding: 10px; flex-direction: column; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 100; text-align: left; min-width: 150px;">
-                                <a href="#" onclick="shareTo('whatsapp', '<%= c.id %>'); return false;" style="color: #e4e4e7; text-decoration: none; padding: 5px; border-radius: 4px; cursor: pointer;"><span style="color: #25D366; margin-right: 8px;">📱</span> WhatsApp</a>
-                                <a href="#" onclick="shareTo('telegram', '<%= c.id %>'); return false;" style="color: #e4e4e7; text-decoration: none; padding: 5px; border-radius: 4px; cursor: pointer;"><span style="color: #0088cc; margin-right: 8px;">✈️</span> Telegram</a>
-                                <a href="#" onclick="shareTo('linkedin', '<%= c.id %>'); return false;" style="color: #e4e4e7; text-decoration: none; padding: 5px; border-radius: 4px; cursor: pointer;"><span style="color: #0a66c2; margin-right: 8px;">💼</span> LinkedIn</a>
-                                <a href="#" onclick="shareTo('facebook', '<%= c.id %>'); return false;" style="color: #e4e4e7; text-decoration: none; padding: 5px; border-radius: 4px; cursor: pointer;"><span style="color: #1877f2; margin-right: 8px;">👍</span> Facebook</a>
+                            <div id="share-menu-<%= c.id %>" class="share-menu">
+                                <a href="#" onclick="shareTo('whatsapp', '<%= c.id %>'); return false;"><span style="color:#25D366;">📱</span> WhatsApp</a>
+                                <a href="#" onclick="shareTo('telegram', '<%= c.id %>'); return false;"><span style="color:#0088cc;">✈️</span> Telegram</a>
+                                <a href="#" onclick="shareTo('linkedin', '<%= c.id %>'); return false;"><span style="color:#0a66c2;">💼</span> LinkedIn</a>
+                                <a href="#" onclick="shareTo('facebook', '<%= c.id %>'); return false;"><span style="color:#1877f2;">👍</span> Facebook</a>
                             </div>
                         </div>
                     </div>
                 <% }) %>
             </div>
         <% } else { %>
-            <div style="text-align: center; padding: 50px; background: #111; border-radius: 8px; border: 1px solid #333;">
-                <span style="font-size: 60px;">🏆</span>
+            <div class="certs-empty">
+                <span class="certs-empty-icon">🏆</span>
                 <h3>Aún no has ganado ningún reto.</h3>
-                <p style="color: #aaa;">¡Ve al Lobby, reta a alguien en 1v1 y consigue tu primer certificado!</p>
+                <p>¡Ve al Lobby, reta a alguien en 1v1 y consigue tu primer certificado!</p>
                 <a href="/batalla" class="btn" style="margin-top: 20px;">Ir al Lobby</a>
             </div>
         <% } %>
