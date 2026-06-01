@@ -27,7 +27,7 @@
         }
         .reto-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 columnas fijas */
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-top: 20px;
         }
@@ -46,49 +46,71 @@
         }
         .dificultad {
             font-size: 0.8em;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-weight: 700;
             display: inline-block;
         }
-        .dif-fácil { background: #0f2d1a; color: #22c55e; border: 1px solid #14532d; font-size: 14px; }
-        .dif-medio { background: #2d1f00; color: #eab308; border: 1px solid #713f12; font-size: 14px; }
-        .dif-difícil { background: #2d0f0f; color: #ef4444; border: 1px solid #7f1d1d; font-size: 14px; }
+        .dif-fácil  { background: #0f2d1a; color: #22c55e; border: 1px solid #14532d; font-size: 13px; }
+        .dif-medio  { background: #2d1f00; color: #eab308; border: 1px solid #713f12; font-size: 13px; }
+        .dif-difícil { background: #2d0f0f; color: #ef4444; border: 1px solid #7f1d1d; font-size: 13px; }
         
         .resuelto-badge {
-            background: #0f2d1a; color: #22c55e; border: 1px solid #14532d; font-size: 14px;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
+            background: #0f2d1a; color: #22c55e; border: 1px solid #14532d;
+            padding: 4px 10px;
+            border-radius: 9999px;
             font-size: 0.8em;
-            font-weight: bold;
+            font-weight: 700;
         }
         .reto-title { 
             margin-top: 0;
             margin-bottom: 10px;
             font-size: 1.25em; 
-            color: #f8fafc; font-size: 1.4em;
+            color: #f8fafc;
         }
         .reto-desc {
-            flex-grow: 1; /* Esto hace que las tarjetas mantengan un tamaño uniforme empujando el botón hacia abajo */
+            flex-grow: 1;
         }
         .estrellas {
             color: #ffc107;
             font-size: 1.1em;
             margin-bottom: 10px;
         }
+        /* Stats bar del reto */
+        .reto-stats-bar {
+            display: flex;
+            gap: 12px;
+            font-size: 0.8em;
+            color: #94a3b8;
+            background: #0f111a;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #1e293b;
+            margin-top: auto;
+        }
         .btn-crear-reto {
             background-color: #4f46e5;
             color: white;
             padding: 10px 15px;
             text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 600;
             margin-left: auto;
+            transition: background 0.15s;
         }
         .btn-crear-reto:hover {
             background-color: #4338ca;
         }
+        /* Light theme overrides para esta página */
+        body.light-theme .filter-bar  { background: #fff; border-color: #e2e8f0; }
+        body.light-theme .filter-select { background: #fff; border-color: #cbd5e1; color: #334155; }
+        body.light-theme .dif-fácil   { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+        body.light-theme .dif-medio   { background: #fef9c3; color: #a16207; border-color: #fde68a; }
+        body.light-theme .dif-difícil { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+        body.light-theme .resuelto-badge { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+        body.light-theme .reto-title  { color: #0f172a; }
+        body.light-theme .reto-stats-bar { background: #f1f5f9; border-color: #e2e8f0; color: #64748b; }
+        body.light-theme .estrellas span[style] { color: #94a3b8 !important; }
     </style>
 </head>
 <body>
@@ -156,7 +178,7 @@
                                 if (diffLabel === 'Medio') { rRam = '64MB'; rCpu = '30%'; rTime = '300s'; }
                                 else if (diffLabel.includes('Dif') || diffLabel === 'Difícil') { rRam = '128MB'; rCpu = '60%'; rTime = '600s'; }
                             %>
-                            <div style="display: flex; gap: 12px; font-size: 0.8em; color: #94a3b8; background: #0f111a; padding: 8px 10px; border-radius: 6px; border: 1px solid #1e293b; margin-top: auto;">
+                            <div class="reto-stats-bar">
                                 <span title="Memoria RAM Estimada">💾 <%= rRam %></span>
                                 <span title="Uso de CPU Estimado">⚡ <%= rCpu %></span>
                                 <span title="Tiempo Límite">⏱️ <%= rTime %></span>

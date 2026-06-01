@@ -7,8 +7,10 @@
     <link rel="stylesheet" href="/css/style.css">
     <style>
         .usuarios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
-        .usuario-card { background: #1a1a2e; padding: 20px; border-radius: 8px; border: 1px solid #2a2a4a; text-align: center; }
-        .usuario-avatar { width: 60px; height: 60px; border-radius: 50%; background: #4f46e5; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        .usuario-card { background: #1a1a2e; padding: 20px; border-radius: 12px; border: 1px solid #2a2a4a; text-align: center; transition: border-color 0.2s, box-shadow 0.2s; }
+        .usuario-card:hover { border-color: #4f46e5; box-shadow: 0 4px 16px rgba(99,102,241,0.15); }
+        .usuario-avatar { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a855f7); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin-bottom: 10px; color: #fff; }
+        .usuario-subtitulo { color: #888; font-size: 14px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -21,7 +23,7 @@
                     <div class="usuario-card">
                         <div class="usuario-avatar"><%= u.nombre.charAt(0).toUpperCase() %></div>
                         <h3><%= u.nombre %></h3>
-                        <p style="color: #888; font-size: 14px; margin-bottom: 15px;">Jugador activo</p>
+                        <p class="usuario-subtitulo">Jugador activo</p>
                         
                         <% if (u.estadoAmistad === 'aceptado') { %>
                             <span class="badge badge-Exitoso">✓ Amigo</span>

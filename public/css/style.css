@@ -833,92 +833,179 @@ body.login-page, body.auth-page, .auth-wrapper {
 }
 
 /* =========================================================
-   7. LIGHT THEME (TEMA CLARO)
+   7. LIGHT THEME (TEMA CLARO) — Cobertura completa
    ========================================================= */
+
+/* Tokens OKLCH para modo claro */
 body.light-theme {
-  background: #f8fafc;
+  background: #f1f5f9;
   color: #1e293b;
+  --background:         oklch(0.97 0.003 264);
+  --card:               oklch(1 0 0);
+  --foreground:         oklch(0.15 0.005 264);
+  --foreground-muted:   oklch(0.44 0.012 264);
+  --border:             oklch(0.88 0.005 264);
+  --shimmer-1:          oklch(0 0 0 / 3%);
+  --shimmer-2:          oklch(0 0 0 / 7%);
 }
 
+/* Sidebar */
 body.light-theme nav, body.light-theme header, body.light-theme .navbar {
   background: #ffffff;
   border-right: 1px solid #e2e8f0;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.06);
 }
+body.light-theme nav strong { color: #0f172a; }
+body.light-theme nav a { color: #64748b; }
+body.light-theme nav a:hover { color: #1e293b; background: #f1f5f9; }
+body.light-theme nav a.btn-crear { color: #6366f1; border-color: #e0e7ff; }
+body.light-theme nav a.btn-crear:hover { background: #eef2ff; border-color: #6366f1; }
+body.light-theme nav a.btn-logout { color: #ef4444; }
+body.light-theme nav a.btn-logout:hover { background: #fef2f2; border-color: #fecaca; }
 
-body.light-theme nav strong, body.light-theme h1, body.light-theme h2, body.light-theme h3 {
-  color: #0f172a;
-}
+/* Tipografía */
+body.light-theme h1, body.light-theme h2, body.light-theme h3,
+body.light-theme nav strong, body.light-theme .card-title, body.light-theme .reto-title { color: #0f172a; }
+body.light-theme p, body.light-theme .descripcion { color: #475569; }
 
-body.light-theme p, body.light-theme .descripcion {
-  color: #475569;
-}
-
-body.light-theme .card, body.light-theme .banco-card, body.light-theme .form-crear-reto, body.light-theme .banco-detalles, body.light-theme .banco-item, body.light-theme .reto-card {
+/* Cards */
+body.light-theme .card, body.light-theme .banco-card, body.light-theme .reto-card,
+body.light-theme .form-crear-reto, body.light-theme .banco-detalles, body.light-theme .banco-item {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
 }
-
-body.light-theme .card:hover, body.light-theme .banco-card:hover, body.light-theme .form-crear-reto:hover, body.light-theme .banco-detalles:hover, body.light-theme .banco-item:hover, body.light-theme .reto-card:hover {
-  border-color: #cbd5e1;
+body.light-theme .card:hover, body.light-theme .banco-card:hover, body.light-theme .reto-card:hover,
+body.light-theme .form-crear-reto:hover, body.light-theme .banco-detalles:hover, body.light-theme .banco-item:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.1);
 }
+body.light-theme .card p, body.light-theme .reto-card p, body.light-theme .banco-card p { color: #64748b; }
+body.light-theme .card h2, body.light-theme .card h3, body.light-theme .reto-card h2, body.light-theme .banco-card h2 { color: #0f172a; }
 
-body.light-theme input, body.light-theme textarea, body.light-theme select, body.light-theme .form-control {
+/* Inputs */
+body.light-theme input[type="text"], body.light-theme input[type="password"],
+body.light-theme input[type="email"], body.light-theme input[type="number"],
+body.light-theme textarea, body.light-theme select,
+body.light-theme .form-control, body.light-theme .filter-select {
   background: #ffffff;
   border: 1px solid #cbd5e1;
   color: #334155;
 }
-
-body.light-theme input:focus, body.light-theme textarea:focus, body.light-theme select:focus {
+body.light-theme input:focus, body.light-theme textarea:focus,
+body.light-theme select:focus, body.light-theme .filter-select:focus {
   border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
+body.light-theme input::placeholder, body.light-theme textarea::placeholder { color: #94a3b8; }
 
-body.light-theme .console, body.light-theme #consoleOutput {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
+/* Filtros bar (global + retos/lista.ejs) */
+body.light-theme .filtros-bar, body.light-theme .filters, body.light-theme .filter-bar {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   color: #334155;
 }
 
-body.light-theme .batalla-banner {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-body.light-theme .batalla-panel {
+/* Usuario cards */
+body.light-theme .usuario-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+body.light-theme .usuario-card h3 { color: #0f172a; }
+body.light-theme .usuario-card p  { color: #64748b; }
+
+/* Amigos */
+body.light-theme .amigo-item { background: #ffffff; border: 1px solid #e2e8f0; }
+body.light-theme .amigo-item:hover { border-color: #c7d2fe; }
+
+/* Badges semáforo */
+body.light-theme .badge, body.light-theme .categoria, body.light-theme .tag, body.light-theme .badge-dificultad {
+  background: #eef2ff; color: #4338ca; border-color: #c7d2fe;
+}
+body.light-theme .badge-Fácil, body.light-theme .dificultad-Fácil, body.light-theme .badge-facil,
+body.light-theme .badge-easy, body.light-theme .dif-fácil {
+  background: #dcfce7; color: #15803d; border-color: #bbf7d0;
+}
+body.light-theme .badge-Medio, body.light-theme .dificultad-Medio, body.light-theme .badge-medio,
+body.light-theme .badge-med, body.light-theme .dif-medio {
+  background: #fef9c3; color: #a16207; border-color: #fde68a;
+}
+body.light-theme .badge-Difícil, body.light-theme .dificultad-Difícil, body.light-theme .badge-dificil,
+body.light-theme .badge-hard, body.light-theme .dif-difícil {
+  background: #fee2e2; color: #b91c1c; border-color: #fca5a5;
+}
+body.light-theme .badge-resuelto, body.light-theme .badge-Exitoso, body.light-theme .resuelto-badge {
+  background: #dcfce7; color: #15803d; border-color: #bbf7d0;
+}
+body.light-theme .badge-Fallido { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+body.light-theme .estado-oponente-badge { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
+
+/* Stats bar de reto (fondo oscuro hardcodeado) */
+body.light-theme .reto-card div[style*="0f111a"],
+body.light-theme .reto-card div[style*="0f0f0f"] {
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #64748b !important;
 }
 
-body.light-theme .casos-container, body.light-theme .test-cases-list .test-case-item {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+/* Consola / Editor */
+body.light-theme .console, body.light-theme #consoleOutput, body.light-theme .output, body.light-theme .terminal {
+  background: #f8fafc; border: 1px solid #e2e8f0; color: #334155;
+}
+body.light-theme .code-area, body.light-theme #codeEditor, body.light-theme textarea.codigo {
+  background: #f8fafc; border-color: #e2e8f0; color: #1e293b;
 }
 
-body.light-theme .caso-row {
-  border-bottom: 1px solid #e2e8f0;
-}
+/* Batalla */
+body.light-theme .batalla-banner { background: #ffffff; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+body.light-theme .batalla-panel  { background: #ffffff; border: 1px solid #e2e8f0; }
+body.light-theme .batalla-vs { color: #6366f1; }
 
+/* Test cases */
+body.light-theme .casos-container, body.light-theme .test-cases-list .test-case-item, body.light-theme .test-case-item {
+  background: #f8fafc; border: 1px solid #e2e8f0;
+}
+body.light-theme .caso-row { border-bottom: 1px solid #e2e8f0; }
+
+/* Glass */
 body.light-theme .glass-effect {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
 }
 
-body.light-theme .btn-secondary, body.light-theme .btn-reset, body.light-theme .btn-volver, body.light-theme a.btn-secondary, body.light-theme .btn-outline {
-  border-color: #cbd5e1;
-  color: #475569;
+/* Botones secundarios */
+body.light-theme .btn-secondary, body.light-theme .btn-reset, body.light-theme .btn-volver,
+body.light-theme a.btn-secondary, body.light-theme .btn-outline,
+body.light-theme .btn-gestionar, body.light-theme a.btn-gestionar {
+  border-color: #cbd5e1; color: #475569; background: transparent;
+}
+body.light-theme .btn-secondary:hover, body.light-theme .btn-reset:hover,
+body.light-theme .btn-volver:hover, body.light-theme a.btn-secondary:hover,
+body.light-theme .btn-outline:hover, body.light-theme .btn-gestionar:hover,
+body.light-theme a.btn-gestionar:hover {
+  border-color: #6366f1; color: #0f172a; background: #eef2ff;
 }
 
-body.light-theme .btn-secondary:hover, body.light-theme .btn-reset:hover, body.light-theme .btn-volver:hover, body.light-theme a.btn-secondary:hover, body.light-theme .btn-outline:hover {
-  border-color: #94a3b8;
-  color: #0f172a;
+/* Login */
+body.light-theme .login-card, body.light-theme .auth-card, body.light-theme .login-container {
+  background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 8px 32px rgba(0,0,0,0.08);
 }
 
-body.light-theme .filtros-bar, body.light-theme .filters {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-}
+/* Scrollbar claro */
+body.light-theme ::-webkit-scrollbar-track { background: #f1f5f9; }
+body.light-theme ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); }
+body.light-theme ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.28); }
+
+/* Toast claro */
+body.light-theme .toast { background: rgba(255,255,255,0.97); color: #0f172a; box-shadow: 0 10px 30px rgba(0,0,0,0.12); }
+
+/* Modal claro */
+body.light-theme .modal-content { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 25px 50px rgba(0,0,0,0.12); }
+
+/* Subtítulo usuario claro */
+body.light-theme .usuario-subtitulo { color: #64748b; }
 
 /* Transiciones globales */
 body, nav, .card, input, select, .console, .batalla-panel, .batalla-banner {
