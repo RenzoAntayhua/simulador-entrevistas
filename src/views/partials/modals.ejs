@@ -68,6 +68,27 @@
     }
     body.light-theme .close-modal { color: #64748b; }
     body.light-theme .close-modal:hover { background: #f1f5f9; color: #0f172a; }
+
+    /* Casos container en modal */
+    .modal-casos-container {
+        background: rgba(0, 0, 0, 0.18);
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+    body.light-theme .modal-casos-container {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+    /* Separador HR en modal */
+    .modal-hr {
+        margin: 15px 0;
+        border: none;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    body.light-theme .modal-hr {
+        border-top-color: #e2e8f0;
+    }
 </style>
 
 <div id="universal-modal-overlay" class="modal-overlay">
@@ -136,10 +157,10 @@
             <label>Pista (Opcional)</label>
             <input type="text" name="pista" class="form-control" placeholder="Ej: Intenta usar el método split() y reverse().">
         </div>
-        <hr style="margin: 15px 0; border-color: #333;">
+        <hr class="modal-hr">
         <div class="form-group" style="margin-bottom: 20px;">
             <label>Casos de Prueba Básicos (2 mínimos requeridos)</label>
-            <div id="modal-casos-container" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+            <div id="modal-casos-container" class="modal-casos-container">
                 <div class="caso-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
                     <input type="text" name="casos_input" class="form-control" required placeholder='Input: "hola"'>
                     <input type="text" name="casos_output" class="form-control" required placeholder='Output: "aloh"'>
