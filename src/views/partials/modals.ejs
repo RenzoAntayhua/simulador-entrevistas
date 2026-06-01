@@ -1,10 +1,11 @@
 <style>
-    /* Estilos del Modal Universal */
+    /* Estilos del Modal Universal — SCADE-UPT */
     .modal-overlay {
         position: fixed;
         top: 0; left: 0; width: 100vw; height: 100vh;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(8px);
+        background: oklch(0 0 0 / 65%);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -18,35 +19,47 @@
         pointer-events: auto;
     }
     .modal-content {
-        background: var(--light-bg, #16161a);
-        padding: 30px;
-        border-radius: 12px;
+        background: oklch(0.15 0.006 285);
+        padding: 32px;
+        border-radius: 16px;
         width: 100%;
         max-width: 600px;
         max-height: 90vh;
         overflow-y: auto;
         position: relative;
-        transform: translateY(20px);
-        transition: transform 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        border: 1px solid oklch(1 0 0 / 10%);
+        box-shadow:
+            0 0 0 1px oklch(1 0 0 / 4%),
+            0 25px 50px -12px oklch(0 0 0 / 60%),
+            0 8px 16px -4px oklch(0 0 0 / 30%);
+        /* La animación la aplica JS añadiendo .modal-enter */
+        transform-origin: center center;
     }
+    /* Cuando el overlay se activa, dispara el zoom elástico en el contenido */
     .modal-overlay.active .modal-content {
-        transform: translateY(0);
+        animation: modal-zoom-in var(--modal-duration-enter) var(--modal-easing-enter) forwards;
     }
     .close-modal {
         position: absolute;
-        top: 15px; right: 20px;
-        font-size: 24px;
-        color: #999;
+        top: 16px; right: 20px;
+        font-size: 22px;
+        width: 28px; height: 28px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 6px;
+        color: oklch(0.68 0.013 286);
         cursor: pointer;
-        transition: color 0.2s;
+        transition: background 0.15s, color 0.15s;
+        line-height: 1;
     }
-    .close-modal:hover { color: #fff; }
+    .close-modal:hover {
+        background: oklch(1 0 0 / 8%);
+        color: oklch(0.96 0 0);
+    }
     
     /* Adaptación para Light Theme */
     body.light-theme .modal-overlay {
-        background: rgba(255, 255, 255, 0.4);
+        background: oklch(1 0 0 / 50%);
+        backdrop-filter: blur(12px);
     }
     body.light-theme .modal-content {
         background: #ffffff;
@@ -54,7 +67,7 @@
         box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     }
     body.light-theme .close-modal { color: #64748b; }
-    body.light-theme .close-modal:hover { color: #0f172a; }
+    body.light-theme .close-modal:hover { background: #f1f5f9; color: #0f172a; }
 </style>
 
 <div id="universal-modal-overlay" class="modal-overlay">
