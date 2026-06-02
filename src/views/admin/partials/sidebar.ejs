@@ -62,6 +62,7 @@
         function closeAdminMenu() {
             adminSidebar.classList.remove('menu-open');
             document.getElementById('adminMenuBackdrop')?.remove();
+            document.body.style.overflow = ''; // Habilitar scroll del body
         }
         
         adminToggleBtn?.addEventListener('click', (e) => {
@@ -69,6 +70,7 @@
             adminSidebar.classList.toggle('menu-open');
             if (adminSidebar.classList.contains('menu-open')) {
                 document.getElementById('adminMenuBackdrop')?.remove();
+                document.body.style.overflow = 'hidden'; // Deshabilitar scroll del body
                 
                 const backdrop = document.createElement('div');
                 backdrop.id = 'adminMenuBackdrop';

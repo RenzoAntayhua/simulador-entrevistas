@@ -316,6 +316,8 @@ tr:hover { background-color: #111; }
         padding: 20px 0 !important;
         display: block !important;
         box-shadow: 4px 0 25px rgba(0,0,0,0.6);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
     body.light-theme .admin-sidebar {
         background-color: #ffffff !important;

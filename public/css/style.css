@@ -779,6 +779,7 @@ body.login-page, body.auth-page, .auth-wrapper {
     border-right: 1px solid #1c1c1c;
     border-bottom: none;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: flex !important;
     flex-direction: column !important;
     padding: 32px 24px !important;

@@ -132,6 +132,7 @@
         function closeMenu() {
             nav.classList.remove('menu-open');
             document.getElementById('menuBackdrop')?.remove();
+            document.body.style.overflow = ''; // Rehabilitar scroll del body
         }
         
         toggleBtn?.addEventListener('click', (e) => {
@@ -139,6 +140,7 @@
             nav.classList.toggle('menu-open');
             if (nav.classList.contains('menu-open')) {
                 document.getElementById('menuBackdrop')?.remove();
+                document.body.style.overflow = 'hidden'; // Evitar scroll del fondo
                 
                 const backdrop = document.createElement('div');
                 backdrop.id = 'menuBackdrop';
