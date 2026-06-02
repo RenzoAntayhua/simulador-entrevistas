@@ -240,6 +240,22 @@
         body.light-theme .footer-text {
             color: #64748b !important;
         }
+
+        @media (max-width: 480px) {
+            .modern-glass {
+                padding: 30px 20px !important;
+                max-width: 90% !important;
+                margin: 0 auto;
+            }
+            .input-modern input {
+                padding: 12px 14px !important;
+                font-size: 14px !important;
+            }
+            .btn-glow {
+                padding: 12px !important;
+                font-size: 15px !important;
+            }
+        }
     </style>
     <div class="auth-wrapper glass-bg">
         <div class="login-container modern-glass">
@@ -254,7 +270,7 @@
             </div>
 
             <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
-                data-text="signin_with" data-size="large" data-logo_alignment="center" data-width="400">
+                data-text="signin_with" data-size="large" data-logo_alignment="center" data-width="300" style="width: 100%; display: flex; justify-content: center;">
             </div>
 
             <form id="google-auth-form" action="/auth/google" method="POST" style="display: none;">
