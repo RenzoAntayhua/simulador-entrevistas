@@ -6,11 +6,10 @@
         <li><a href="/admin/retos" class="<%= currentPath && currentPath.startsWith('/admin/retos') ? 'active' : '' %>">🔥 Retos</a></li>
         <li><a href="/admin/bancos" class="<%= currentPath && currentPath.startsWith('/admin/bancos') ? 'active' : '' %>">📚 Bancos</a></li>
         <li><a href="/admin/reporte/pdf" target="_blank">📄 Reporte (PDF)</a></li>
-        <li><a href="/dashboard">🏠 Volver al Inicio</a></li>
         <li><a href="/logout">🚪 Salir</a></li>
     </ul>
     
-    <div style="padding: 20px; position: absolute; bottom: 0; width: 100%; box-sizing: border-box;">
+    <div style="padding: 15px 20px; margin-top: 10px;">
         <button id="adminThemeToggleBtn" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 500; transition: all 0.2s;">
             <span id="adminThemeIcon">☀️</span> Modo Claro
         </button>
