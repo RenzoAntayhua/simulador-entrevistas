@@ -1,3 +1,11 @@
+<div class="admin-mobile-header-bar">
+    <button id="adminMobileMenuToggleBtn" class="admin-hamburger-btn">
+        ☰
+    </button>
+    <span class="admin-mobile-logo-title">Admin Panel</span>
+    <div style="width: 24px;"></div>
+</div>
+
 <div class="admin-sidebar">
     <h3>Admin Panel</h3>
     <ul>
@@ -42,6 +50,36 @@
             } else {
                 localStorage.setItem('theme', 'dark');
                 btn.innerHTML = '☀️ Modo Claro';
+            }
+        });
+
+        // Toggle de menú lateral en admin
+        const adminSidebar = document.querySelector('.admin-sidebar');
+        const adminToggleBtn = document.getElementById('adminMobileMenuToggleBtn');
+        
+        adminToggleBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            adminSidebar.classList.toggle('menu-open');
+            if (adminSidebar.classList.contains('menu-open')) {
+                document.getElementById('adminMenuBackdrop')?.remove();
+                
+                const backdrop = document.createElement('div');
+                backdrop.id = 'adminMenuBackdrop';
+                backdrop.style.position = 'fixed';
+                backdrop.style.top = '0';
+                backdrop.style.left = '0';
+                backdrop.style.width = '100vw';
+                backdrop.style.height = '100vh';
+                backdrop.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                backdrop.style.zIndex = '9998';
+                document.body.appendChild(backdrop);
+                
+                backdrop.addEventListener('click', () => {
+                    adminSidebar.classList.remove('menu-open');
+                    backdrop.remove();
+                });
+            } else {
+                document.getElementById('adminMenuBackdrop')?.remove();
             }
         });
     });

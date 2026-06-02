@@ -6,6 +6,14 @@
         document.body && document.body.classList.add('light-theme');
     }
 </script>
+
+<div class="mobile-header-bar">
+    <button id="mobileMenuToggleBtn" class="hamburger-btn">
+        ☰
+    </button>
+    <span class="mobile-logo-title">TechSim Solutions</span>
+    <div style="width: 24px;"></div>
+</div>
 <button id="themeToggleBtn" class="theme-floating-btn">
     <span id="themeIcon">☀️</span> Modo Claro
 </button>
@@ -113,3 +121,36 @@
 </script>
 
 <%- include('modals') %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nav = document.querySelector('nav');
+        const toggleBtn = document.getElementById('mobileMenuToggleBtn');
+        
+        toggleBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            nav.classList.toggle('menu-open');
+            if (nav.classList.contains('menu-open')) {
+                document.getElementById('menuBackdrop')?.remove();
+                
+                const backdrop = document.createElement('div');
+                backdrop.id = 'menuBackdrop';
+                backdrop.style.position = 'fixed';
+                backdrop.style.top = '0';
+                backdrop.style.left = '0';
+                backdrop.style.width = '100vw';
+                backdrop.style.height = '100vh';
+                backdrop.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                backdrop.style.zIndex = '9998';
+                document.body.appendChild(backdrop);
+                
+                backdrop.addEventListener('click', () => {
+                    nav.classList.remove('menu-open');
+                    backdrop.remove();
+                });
+            } else {
+                document.getElementById('menuBackdrop')?.remove();
+            }
+        });
+    });
+</script>
