@@ -111,8 +111,9 @@ app.use(session({
 
 // 3. Variables locales globales (para usarse en vistas)
 app.use((req, res, next) => {
-    res.locals.userName = req.session ? req.session.userName : null;
-    res.locals.userId = req.session ? req.session.userId : null;
+    res.locals.userName    = req.session ? req.session.userName : null;
+    res.locals.userId      = req.session ? req.session.userId   : null;
+    res.locals.currentPath = req.path; // Para marcar el link activo en el sidebar
     next();
 });
 

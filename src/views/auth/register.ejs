@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - TechSim Solutions</title>
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light-theme');
+        }
+    </script>
 </head>
 
 <body class="auth-page">
@@ -112,6 +117,69 @@
         @media (max-width: 480px) {
             .modern-glass { padding: 30px 20px !important; }
         }
+
+        /* Floating theme toggle button */
+        .theme-floating-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            z-index: 1000;
+        }
+        .theme-floating-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+        body.light-theme .theme-floating-btn {
+            background: #fff;
+            border-color: #cbd5e1;
+            color: #0f172a;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        body.light-theme .theme-floating-btn:hover {
+            background: #f1f5f9;
+        }
+
+        /* Light theme overrides */
+        body.light-theme.auth-page {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+            color: #0f172a !important;
+        }
+        body.light-theme .modern-glass {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+        }
+        body.light-theme .modern-glass h1 {
+            color: #0f172a !important;
+        }
+        body.light-theme .modern-glass p.subtitle {
+            color: #475569 !important;
+        }
+        body.light-theme .input-group input {
+            background: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        body.light-theme .input-group input:focus {
+            border-color: rgba(99, 102, 241, 0.5) !important;
+            background: rgba(99, 102, 241, 0.02) !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+        }
+        body.light-theme .footer-text {
+            color: #64748b !important;
+        }
     </style>
 
     <div class="glass-bg">
@@ -138,6 +206,30 @@
             </div>
         </div>
     </div>
+
+    <button id="themeToggleBtn" class="theme-floating-btn">
+        <span id="themeIcon">☀️</span> Modo Claro
+    </button>
+
+    <script>
+        const btnText = document.getElementById('themeToggleBtn');
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+            document.documentElement.classList.add('light-theme');
+            if (btnText) btnText.innerHTML = '🌙 Modo Oscuro';
+        }
+        btnText?.addEventListener('click', () => {
+            const isLight = document.body.classList.toggle('light-theme');
+            document.documentElement.classList.toggle('light-theme', isLight);
+            if (isLight) {
+                localStorage.setItem('theme', 'light');
+                btnText.innerHTML = '🌙 Modo Oscuro';
+            } else {
+                localStorage.setItem('theme', 'dark');
+                btnText.innerHTML = '☀️ Modo Claro';
+            }
+        });
+    </script>
 </body>
 
 </html>

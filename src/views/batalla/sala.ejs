@@ -5,6 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batalla: <%= reto.titulo %></title>
     <link rel="stylesheet" href="/css/style.css">
+<style>
+    /* Overlay resultado */
+    .resultado-overlay-inner {
+        text-align: center;
+        background: #111;
+        padding: 40px;
+        border-radius: 16px;
+        border: 1px solid #333;
+        min-width: 320px;
+    }
+    body.light-theme .resultado-overlay-inner {
+        background: #ffffff;
+        border-color: #e2e8f0;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    }
+    /* Editor container border */
+    .editor-monaco-wrapper {
+        flex: 1;
+        min-height: 300px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #1c1c1c;
+        margin-bottom: 10px;
+    }
+    body.light-theme .editor-monaco-wrapper { border-color: #e2e8f0; }
+    /* Enunciado text */
+    .reto-enunciado { font-size: 16px; color: #ccc; }
+    body.light-theme .reto-enunciado { color: #475569; }
+    /* HR en sala */
+    .sala-hr { border-color: #333; margin: 20px 0; }
+    body.light-theme .sala-hr { border-color: #e2e8f0; }
+</style>
 </head>
 <body>
     <%- include('../partials/header') %>
@@ -32,7 +64,7 @@
     </div>
 
     <div id="overlay-resultado" class="overlay-resultado" style="display: none;">
-        <div style="text-align: center; background: #111; padding: 40px; border-radius: 12px; border: 1px solid #333;">
+        <div class="resultado-overlay-inner">
             <h1 id="resultado-texto" style="font-size: 48px; margin-bottom: 20px;"></h1>
             <a href="/batalla" class="btn" style="font-size: 18px;">Volver al Lobby</a>
             <a href="/certificados" class="btn" id="btn-certificado" style="font-size: 18px; display: none; background: #eab308; color: black; margin-left: 10px;">Ver Certificado</a>
@@ -42,8 +74,8 @@
     <div class="batalla-layout">
         <div class="batalla-panel glass-effect">
             <h2><%= reto.titulo %></h2>
-            <p style="font-size: 16px; color: #ccc;"><%= reto.enunciado %></p>
-            <hr style="border-color: #333; margin: 20px 0;">
+            <p class="reto-enunciado"><%= reto.enunciado %></p>
+            <hr class="sala-hr">
             <h3>Casos de Prueba</h3>
             <div class="test-cases-list">
                 <% if(casosPrueba && casosPrueba.length > 0) { %>
@@ -62,7 +94,7 @@
                 <h3 style="margin: 0;">Tu Código</h3>
                 <button class="btn btn-run" onclick="runCode()" id="btnRun" disabled>Esperando inicio...</button>
             </div>
-            <div id="editor-container-monaco" style="flex: 1; min-height: 300px; border-radius: 8px; overflow: hidden; border: 1px solid #1c1c1c; margin-bottom: 10px;"></div>
+            <div id="editor-container-monaco" class="editor-monaco-wrapper"></div>
             <div id="consoleOutput" class="console" style="margin-top: 0; min-height: 120px;">>_ Esperando ejecución...</div>
         </div>
     </div>

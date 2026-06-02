@@ -6,12 +6,40 @@
     <title><%= banco.titulo %> - Simulador</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
-        .examen-option { margin-bottom: 0.5rem; display: block; cursor: pointer; transition: all 0.2s ease; }
-        .examen-option:hover { border-color: #CBD5E1 !important; background-color: #1e293b; }
-        .seleccionada { border-color: #818cf8 !important; background-color: #EEF2FF !important; }
-        .correcto { background-color: #D1FAE5 !important; border-color: #10B981 !important; color: #065F46; }
-        .incorrecto { background-color: #FEE2E2 !important; border-color: #EF4444 !important; color: #991B1B; }
+        .examen-option { margin-bottom: 0.5rem; display: block; cursor: pointer; transition: all 0.2s ease; border-radius: 6px; }
+        .examen-option:hover { border-color: #6366f1 !important; }
+        .seleccionada { border-color: #818cf8 !important; background-color: #312e81 !important; }
+        .correcto   { background-color: #D1FAE5 !important; border-color: #10B981 !important; color: #065F46 !important; }
+        .incorrecto { background-color: #FEE2E2 !important; border-color: #EF4444 !important; color: #991B1B !important; }
         .autor-actions { display: flex; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+
+        /* Rating form */
+        .rating-form { background: #1e293b; border: 1px solid #334155; padding: 1rem; border-radius: 10px; }
+        .rating-form select { padding: 0.5rem; border-color: #334155; background: #0f172a; color: #f8fafc; cursor: pointer; border-radius: 6px; }
+
+        /* Leaderboard */
+        .leaderboard-card { margin-top: 1.5rem; margin-bottom: 2rem; background: #1e293b; border: 1px solid #334155; padding: 1.5rem; border-radius: 10px; }
+        .leaderboard-title { color: #D97706; margin: 0 0 1rem; border-bottom: 1px solid #FDE68A; padding-bottom: 0.5rem; }
+
+        /* Pregunta card */
+        .pregunta-card { background: #1e293b !important; margin-bottom: 0; }
+        .opcion-label { background: #0f172a; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 6px; }
+
+        /* Panel agregar pregunta */
+        .agregar-panel { background: #1e293b; border: 1px solid #334155; border-radius: 10px; }
+        .agregar-title { color: #4ade80; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        /* Light theme overrides */
+        body.light-theme .rating-form          { background: #f8fafc; border-color: #e2e8f0; }
+        body.light-theme .rating-form select   { background: #ffffff; border-color: #cbd5e1; color: #334155; }
+        body.light-theme .leaderboard-card     { background: #fffbeb; border-color: #fde68a; }
+        body.light-theme .leaderboard-title    { color: #92400e; border-bottom-color: #fde68a; }
+        body.light-theme .pregunta-card        { background: #ffffff !important; border-color: #e2e8f0 !important; }
+        body.light-theme .opcion-label         { background: #f8fafc; border-color: #e2e8f0; color: #1e293b; }
+        body.light-theme .opcion-label:hover   { border-color: #6366f1 !important; background: #eef2ff; }
+        body.light-theme .seleccionada         { background-color: #eef2ff !important; border-color: #6366f1 !important; }
+        body.light-theme .agregar-panel        { background: #f0fdf4; border-color: #bbf7d0; }
+        body.light-theme .agregar-title        { color: #15803d; }
     </style>
 </head>
 <body>
@@ -29,10 +57,10 @@
                     </div>
                 </div>
                 
-                <form action="/bancos/calificar" method="POST" class="card" style="background-color: #1e293b; border-color: #334155; padding: 1rem; margin-bottom: 0;">
+                <form action="/bancos/calificar" method="POST" class="rating-form" style="margin-bottom: 0;">
                     <input type="hidden" name="banco_id" value="<%= banco.id %>">
-                    <label style="font-size: 0.9rem; font-weight: 600; color: #fbbf24; margin-bottom: 0.5rem; display: block;">Calificar este banco:</label>
-                    <select name="estrellas" onchange="this.form.submit()" style="padding: 0.5rem; border-color: #334155; background: #0f172a; color: #f8fafc; cursor: pointer;">
+                    <label style="font-size: 0.9rem; font-weight: 600; color: #fbbf24; margin-bottom: 0.5rem; display: block;">⭐ Calificar este banco:</label>
+                    <select name="estrellas" onchange="this.form.submit()">
                         <option value="">⭐ Selecciona</option>
                         <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
                         <option value="4">⭐⭐⭐⭐ (Muy bueno)</option>
@@ -69,8 +97,8 @@
             </div>
 
             <% if (typeof leaderboard !== 'undefined' && leaderboard.length > 0) { %>
-                <div class="card" style="margin-top: 1.5rem; margin-bottom: 2rem; background-color: #1e293b; border: 1px solid #334155; padding: 1.5rem;">
-                    <h3 style="color: #D97706; margin-top: 0; margin-bottom: 1rem; border-bottom: 1px solid #FDE68A; padding-bottom: 0.5rem;">🏆 Top 5 Mejores Intentos</h3>
+                <div class="leaderboard-card">
+                    <h3 class="leaderboard-title">🏆 Top 5 Mejores Intentos</h3>
                     <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
                         <% leaderboard.forEach(function(intento, i) { %>
                             <li style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem;">
@@ -86,7 +114,7 @@
                 <form id="examenForm" data-banco-id="<%= banco.id %>">
                     <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem;">
                     <% preguntas.forEach((p, index) => { %>
-                        <div class="card pregunta-card" style="margin-bottom: 0; background-color: #1e293b;" data-correcta="<%= p.respuesta_correcta %>" data-id="<%= p.id %>">
+                        <div class="card pregunta-card" data-correcta="<%= p.respuesta_correcta %>" data-id="<%= p.id %>">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-main);">
                                     <span style="color: var(--primary);"><%= index + 1 %>.</span> <%= p.enunciado %>
@@ -112,7 +140,7 @@
                                 %>
                                 
                                 <% opcionesAMostrar.forEach(opt => { %>
-                                    <label class="examen-option" style="background: #0f172a; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                                    <label class="examen-option opcion-label">
                                         <input type="radio" name="p_<%= index %>" value="<%= opt.letra %>" style="margin-right: 0.5rem;"> <strong><%= opt.letra %>)</strong> <%= opt.valor %>
                                     </label>
                                 <% }) %>
@@ -128,7 +156,7 @@
                 </form>
 
             <% } else { %>
-                <div class="card text-center" style="background-color: #1e293b; border-style: dashed; padding: 3rem;">
+                <div class="card text-center pregunta-card" style="border-style: dashed; padding: 3rem;">
                     <p style="margin: 0; color: var(--text-muted); font-size: 1.1rem;">Este banco aún no tiene preguntas.</p>
                 </div>
             <% } %>
@@ -139,9 +167,9 @@
 
             <% if (typeof user !== "undefined" && user.id === banco.autor_id) { %>
                 <hr style="margin: 3rem 0; border: 0; border-top: 1px solid var(--border-color);">
-                <div class="card" style="background-color: #1e293b; border-color: #334155;">
+                <div class="card agregar-panel">
                     <div style="margin-bottom: 1.5rem;">
-                        <h2 style="color: #4ade80; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <h2 class="agregar-title">
                             ➕ Agregar Nueva Pregunta
                         </h2>
                     </div>

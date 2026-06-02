@@ -82,6 +82,11 @@
     </main>
 
     <script>
+        // Datos dinámicos desde el backend
+        const dbRadarData = <%- JSON.stringify(radarData) %>;
+        const dbActivityLabels = <%- JSON.stringify(activityLabels) %>;
+        const dbActivityData = <%- JSON.stringify(activityData) %>;
+
         // Configuración dinámica basada en el tema actual
         const isLight = document.body.classList.contains('light-theme') || localStorage.getItem('theme') === 'light';
         const textColor = isLight ? '#475569' : '#a1a1aa';
@@ -94,8 +99,8 @@
             data: {
                 labels: ['JavaScript', 'Python', 'Java', 'C++', 'C#', 'SQL'],
                 datasets: [{
-                    label: 'Nivel Estimado',
-                    data: [85, 60, 40, 20, 50, 75], // Datos demo
+                    label: 'Retos Resueltos',
+                    data: dbRadarData,
                     backgroundColor: 'rgba(99, 102, 241, 0.2)',
                     borderColor: '#6366f1',
                     pointBackgroundColor: '#6366f1',
@@ -112,7 +117,7 @@
                         angleLines: { color: gridColor },
                         grid: { color: gridColor },
                         pointLabels: { color: textColor, font: { family: 'Inter', size: 12, weight: '500' } },
-                        ticks: { display: false, max: 100, min: 0 }
+                        ticks: { display: false, suggestedMin: 0, suggestedMax: 5 }
                     }
                 },
                 plugins: { legend: { display: false } }
@@ -124,10 +129,10 @@
         const activityChart = new Chart(ctxActivity, {
             type: 'bar',
             data: {
-                labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                labels: dbActivityLabels,
                 datasets: [{
                     label: 'Retos Resueltos',
-                    data: [2, 4, 1, 5, 3, 7, 2], // Datos demo
+                    data: dbActivityData,
                     backgroundColor: '#22c55e', // Verde éxito
                     borderRadius: 4,
                     barPercentage: 0.6
@@ -139,7 +144,7 @@
                 scales: {
                     y: { 
                         grid: { color: gridColor, drawBorder: false }, 
-                        ticks: { color: textColor, stepSize: 2 } 
+                        ticks: { color: textColor, precision: 0, suggestedMin: 0, suggestedMax: 5 } 
                     },
                     x: { 
                         grid: { display: false }, 

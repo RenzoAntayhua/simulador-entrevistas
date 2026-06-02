@@ -30,6 +30,7 @@ router.get('/logout', (req, res) => {
 // --- DASHBOARD ---
 router.get('/dashboard', isAuthenticated, async (req, res) => {
     try {
+        // 1. Mis Bancos
         const [misBancos] = await db.execute(`
             SELECT b.*, AVG(c.estrellas) as promedio, COUNT(c.id) as total_votos 
             FROM bancos b 
@@ -38,10 +39,67 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
             GROUP BY b.id`, 
             [req.session.userId]
         );
-        res.render('home', { nombre: req.session.userName, bancos: misBancos });
+
+        // 2. Radar de Habilidades (Retos resueltos exitosamente agrupados por lenguaje)
+        const labelsRadar = ['JavaScript', 'Python', 'Java', 'C++', 'C#', 'SQL'];
+        const [dbRadarResult] = await db.execute(`
+            SELECT r.lenguaje, COUNT(DISTINCT ir.reto_id) as total
+            FROM intentos_retos ir
+            JOIN retos r ON ir.reto_id = r.id
+            WHERE ir.usuario_id = ? AND ir.resultado = 'Exitoso'
+            GROUP BY r.lenguaje`,
+            [req.session.userId]
+        );
+        const radarData = labelsRadar.map(lang => {
+            const found = dbRadarResult.find(item => item.lenguaje.toLowerCase() === lang.toLowerCase());
+            return found ? found.total : 0;
+        });
+
+        // 3. Actividad (Retos resueltos exitosamente en los últimos 7 días)
+        const last7Days = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            last7Days.push(d);
+        }
+        
+        const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        const activityLabels = last7Days.map(d => dayNames[d.getDay()]);
+        
+        const [dbActivityResult] = await db.execute(`
+            SELECT DATE(fecha) as fecha_dia, COUNT(*) as total
+            FROM intentos_retos
+            WHERE usuario_id = ? AND resultado = 'Exitoso' AND fecha >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+            GROUP BY DATE(fecha)`,
+            [req.session.userId]
+        );
+
+        const activityData = last7Days.map(d => {
+            const localDateString = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            const found = dbActivityResult.find(item => {
+                const itemDate = new Date(item.fecha_dia);
+                const itemDateString = `${itemDate.getFullYear()}-${String(itemDate.getMonth()+1).padStart(2,'0')}-${String(itemDate.getDate()).padStart(2,'0')}`;
+                return itemDateString === localDateString;
+            });
+            return found ? found.total : 0;
+        });
+
+        res.render('home', { 
+            nombre: req.session.userName, 
+            bancos: misBancos, 
+            radarData, 
+            activityLabels, 
+            activityData 
+        });
     } catch (error) {
         console.error(error);
-        res.render('home', { nombre: req.session.userName, bancos: [] });
+        res.render('home', { 
+            nombre: req.session.userName, 
+            bancos: [], 
+            radarData: [0, 0, 0, 0, 0, 0], 
+            activityLabels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'], 
+            activityData: [0, 0, 0, 0, 0, 0, 0] 
+        });
     }
 });
 

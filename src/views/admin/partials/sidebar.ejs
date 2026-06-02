@@ -1,11 +1,49 @@
 <div class="admin-sidebar">
     <h3>Admin Panel</h3>
     <ul>
-        <li><a href="/admin">Dashboard</a></li>
-        <li><a href="/admin/usuarios">Usuarios</a></li>
-        <li><a href="/admin/retos">Retos</a></li>
-        <li><a href="/admin/bancos">Bancos</a></li>
-        <li><a href="/admin/reporte/pdf" target="_blank">Descargar Reporte (PDF)</a></li>
-        <li><a href="/logout">Salir</a></li>
+        <li><a href="/admin" class="<%= currentPath === '/admin' ? 'active' : '' %>">📊 Dashboard</a></li>
+        <li><a href="/admin/usuarios" class="<%= currentPath && currentPath.startsWith('/admin/usuarios') ? 'active' : '' %>">👥 Usuarios</a></li>
+        <li><a href="/admin/retos" class="<%= currentPath && currentPath.startsWith('/admin/retos') ? 'active' : '' %>">🔥 Retos</a></li>
+        <li><a href="/admin/bancos" class="<%= currentPath && currentPath.startsWith('/admin/bancos') ? 'active' : '' %>">📚 Bancos</a></li>
+        <li><a href="/admin/reporte/pdf" target="_blank">📄 Reporte (PDF)</a></li>
+        <li><a href="/dashboard">🏠 Volver al Inicio</a></li>
+        <li><a href="/logout">🚪 Salir</a></li>
     </ul>
+    
+    <div style="padding: 20px; position: absolute; bottom: 0; width: 100%; box-sizing: border-box;">
+        <button id="adminThemeToggleBtn" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 500; transition: all 0.2s;">
+            <span id="adminThemeIcon">☀️</span> Modo Claro
+        </button>
+    </div>
 </div>
+
+<script>
+    // Prevenir destello de colores cargando el tema antes de que la página renderice completamente
+    if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.add('light-theme');
+        document.body && document.body.classList.add('light-theme');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('adminThemeToggleBtn');
+        const icon = document.getElementById('adminThemeIcon');
+        
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+            document.documentElement.classList.add('light-theme');
+            if (btn) btn.innerHTML = '🌙 Modo Oscuro';
+        }
+        
+        btn?.addEventListener('click', () => {
+            const isLight = document.body.classList.toggle('light-theme');
+            document.documentElement.classList.toggle('light-theme', isLight);
+            if (isLight) {
+                localStorage.setItem('theme', 'light');
+                btn.innerHTML = '🌙 Modo Oscuro';
+            } else {
+                localStorage.setItem('theme', 'dark');
+                btn.innerHTML = '☀️ Modo Claro';
+            }
+        });
+    });
+</script>

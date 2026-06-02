@@ -1,6 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* =========================================================
+   0. CSS CUSTOM PROPERTIES (aliases for compatibility)
+   ========================================================= */
+:root {
+  --primary:       #6366f1;
+  --success:       #22c55e;
+  --warning:       #eab308;
+  --danger:        #ef4444;
+  --danger-color:  #ef4444;
+  --text-main:     #f4f4f5;
+  --text-muted:    #a1a1aa;
+  --border-color:  #1e1e2e;
+}
+
+body.light-theme {
+  --text-main:     #0f172a;
+  --text-muted:    #64748b;
+  --border-color:  #e2e8f0;
+}
+
+/* Active nav link */
+nav a.active {
+  color: #ffffff !important;
+  background: rgba(99, 102, 241, 0.18) !important;
+  border-left: 3px solid #6366f1 !important;
+  font-weight: 600;
+}
+body.light-theme nav a.active {
+  color: #4338ca !important;
+  background: #eef2ff !important;
+  border-left: 3px solid #6366f1 !important;
+}
+
+/* =========================================================
    SCADE-UPT — SISTEMA DE TOKENS DE COLOR (OKLCH)
    ========================================================= */
 :root {

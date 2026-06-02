@@ -258,3 +258,116 @@ tr:hover { background-color: #111; }
         min-width: 600px;
     }
 }
+
+/* =========================================================
+   LIGHT THEME OVERRIDES FOR ADMIN PANEL
+   ========================================================= */
+body.light-theme {
+    background-color: #f8fafc;
+    color: #0f172a;
+}
+
+body.light-theme .admin-sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
+}
+
+body.light-theme .admin-sidebar h3 {
+    color: #0f172a;
+}
+
+body.light-theme .admin-sidebar a {
+    color: #64748b;
+}
+
+body.light-theme .admin-sidebar a:hover, 
+body.light-theme .admin-sidebar a.active {
+    color: #6366f1;
+    background-color: #eef2ff;
+}
+
+body.light-theme #adminThemeToggleBtn {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #334155 !important;
+}
+
+body.light-theme #adminThemeToggleBtn:hover {
+    background: #e2e8f0 !important;
+}
+
+body.light-theme .stat-card {
+    background-color: #ffffff;
+    border-color: #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .stat-card h3 {
+    color: #475569;
+}
+
+body.light-theme h1, 
+body.light-theme h2 {
+    color: #0f172a;
+}
+
+body.light-theme table {
+    background-color: #ffffff;
+}
+
+body.light-theme th {
+    background-color: #f1f5f9;
+    color: #334155;
+    border-color: #e2e8f0;
+}
+
+body.light-theme td {
+    color: #334155;
+    border-color: #e2e8f0;
+}
+
+body.light-theme tr:hover {
+    background-color: #f8fafc;
+}
+
+body.light-theme .badge-user {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+body.light-theme .btn-toggle {
+    background-color: #ffffff;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+
+body.light-theme .btn-toggle:hover {
+    background-color: #f1f5f9;
+}
+
+body.light-theme .live-users-section {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+}
+
+body.light-theme .live-header h2 {
+    color: #0f172a;
+}
+
+body.light-theme .live-user-card {
+    background: #ffffff;
+    border-color: #cbd5e1;
+}
+
+body.light-theme .live-user-card:hover {
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.1);
+}
+
+body.light-theme .user-name {
+    color: #334155;
+}
+
+body.light-theme .status-pulse {
+    border-color: #ffffff;
+}
