@@ -747,6 +747,23 @@ body.login-page, body.auth-page, .auth-wrapper {
     color: #0f172a;
   }
 
+  .drawer-close-btn {
+    display: block !important;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    z-index: 10001;
+  }
+  body.light-theme .drawer-close-btn {
+    color: #475569;
+  }
+
   /* Sidebar Drawer */
   nav, header, .navbar {
     position: fixed !important;

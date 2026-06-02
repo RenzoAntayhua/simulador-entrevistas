@@ -19,6 +19,7 @@
 </button>
 
 <nav>
+    <button id="mobileMenuCloseBtn" class="drawer-close-btn" style="display: none;">✕</button>
     <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; gap: 10px;">
         <img src="/img/logo.png" alt="Logo" style="width: 100px; height: auto; object-fit: contain;">
         <strong style="text-align: center; color: #fff;">Simulador Exámenes Técnicos</strong>
@@ -126,6 +127,12 @@
     document.addEventListener('DOMContentLoaded', () => {
         const nav = document.querySelector('nav');
         const toggleBtn = document.getElementById('mobileMenuToggleBtn');
+        const closeBtn = document.getElementById('mobileMenuCloseBtn');
+        
+        function closeMenu() {
+            nav.classList.remove('menu-open');
+            document.getElementById('menuBackdrop')?.remove();
+        }
         
         toggleBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -145,12 +152,23 @@
                 document.body.appendChild(backdrop);
                 
                 backdrop.addEventListener('click', () => {
-                    nav.classList.remove('menu-open');
-                    backdrop.remove();
+                    closeMenu();
                 });
             } else {
-                document.getElementById('menuBackdrop')?.remove();
+                closeMenu();
             }
+        });
+
+        closeBtn?.addEventListener('click', () => {
+            closeMenu();
+        });
+
+        // Cerrar menú al presionar cualquier enlace del nav (evita bloquear modales de Crear Reto / Banco)
+        const navLinks = nav.querySelectorAll('a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                closeMenu();
+            });
         });
     });
 </script>

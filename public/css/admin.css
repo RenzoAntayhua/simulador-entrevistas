@@ -283,6 +283,23 @@ tr:hover { background-color: #111; }
         color: #0f172a;
     }
 
+    .admin-drawer-close-btn {
+        display: block !important;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: transparent;
+        border: none;
+        color: #a1a1aa;
+        font-size: 24px;
+        cursor: pointer;
+        line-height: 1;
+        z-index: 10001;
+    }
+    body.light-theme .admin-drawer-close-btn {
+        color: #475569;
+    }
+
     /* Sidebar Drawer */
     .admin-sidebar {
         position: fixed !important;

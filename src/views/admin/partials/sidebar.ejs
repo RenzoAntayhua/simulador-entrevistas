@@ -7,6 +7,7 @@
 </div>
 
 <div class="admin-sidebar">
+    <button id="adminSidebarCloseBtn" class="admin-drawer-close-btn" style="display: none;">✕</button>
     <h3>Admin Panel</h3>
     <ul>
         <li><a href="/admin" class="<%= currentPath === '/admin' ? 'active' : '' %>">📊 Dashboard</a></li>
@@ -56,6 +57,12 @@
         // Toggle de menú lateral en admin
         const adminSidebar = document.querySelector('.admin-sidebar');
         const adminToggleBtn = document.getElementById('adminMobileMenuToggleBtn');
+        const adminCloseBtn = document.getElementById('adminSidebarCloseBtn');
+        
+        function closeAdminMenu() {
+            adminSidebar.classList.remove('menu-open');
+            document.getElementById('adminMenuBackdrop')?.remove();
+        }
         
         adminToggleBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -75,12 +82,23 @@
                 document.body.appendChild(backdrop);
                 
                 backdrop.addEventListener('click', () => {
-                    adminSidebar.classList.remove('menu-open');
-                    backdrop.remove();
+                    closeAdminMenu();
                 });
             } else {
-                document.getElementById('adminMenuBackdrop')?.remove();
+                closeAdminMenu();
             }
+        });
+
+        adminCloseBtn?.addEventListener('click', () => {
+            closeAdminMenu();
+        });
+
+        // Cerrar menú al presionar cualquier enlace del admin sidebar
+        const adminLinks = adminSidebar.querySelectorAll('a');
+        adminLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                closeAdminMenu();
+            });
         });
     });
 </script>
