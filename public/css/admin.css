@@ -31,6 +31,16 @@ body {
     background-color: rgba(99, 102, 241, 0.1);
 }
 
+.admin-sidebar a.btn-logout {
+    color: #ef4444;
+}
+
+.admin-sidebar a.btn-logout:hover {
+    color: #f87171;
+    background-color: rgba(239, 68, 68, 0.05);
+    border-left: 2px solid #ef4444;
+}
+
 .admin-content {
     margin-left: 220px;
     padding: 32px;
@@ -370,4 +380,13 @@ body.light-theme .user-name {
 
 body.light-theme .status-pulse {
     border-color: #ffffff;
+}
+
+body.light-theme .admin-sidebar a.btn-logout {
+    color: #ef4444;
+}
+body.light-theme .admin-sidebar a.btn-logout:hover {
+    color: #dc2626;
+    background-color: #fef2f2;
+    border-left: 2px solid #ef4444;
 }
