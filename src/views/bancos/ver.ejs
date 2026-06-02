@@ -52,21 +52,21 @@
                     <h1 style="margin-bottom: 0.25rem;"><%= banco.titulo %></h1>
                     <div style="color: #F59E0B; font-weight: bold; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;" title="<%= banco.total_votos || 0 %> votos recibidos">
                         <span><%= banco.promedio ? Number(banco.promedio).toFixed(1) : '0.0' %></span>
-                        <span>⭐</span>
+                        <span>★</span>
                         <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: normal;">(<%= banco.total_votos || 0 %>)</span>
                     </div>
                 </div>
                 
                 <form action="/bancos/calificar" method="POST" class="rating-form" style="margin-bottom: 0;">
                     <input type="hidden" name="banco_id" value="<%= banco.id %>">
-                    <label style="font-size: 0.9rem; font-weight: 600; color: #fbbf24; margin-bottom: 0.5rem; display: block;">⭐ Calificar este banco:</label>
+                    <label style="font-size: 0.9rem; font-weight: 600; color: #fbbf24; margin-bottom: 0.5rem; display: block;">Calificar este banco:</label>
                     <select name="estrellas" onchange="this.form.submit()">
-                        <option value="">⭐ Selecciona</option>
-                        <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
-                        <option value="4">⭐⭐⭐⭐ (Muy bueno)</option>
-                        <option value="3">⭐⭐⭐ (Bueno)</option>
-                        <option value="2">⭐⭐ (Regular)</option>
-                        <option value="1">⭐ (Malo)</option>
+                        <option value="">Selecciona</option>
+                        <option value="5">★★★★★ (Excelente)</option>
+                        <option value="4">★★★★ (Muy bueno)</option>
+                        <option value="3">★★★ (Bueno)</option>
+                        <option value="2">★★ (Regular)</option>
+                        <option value="1">★ (Malo)</option>
                     </select>
                 </form>
             </div>
@@ -80,9 +80,9 @@
 
             <% if (typeof user !== "undefined" && user.id === banco.autor_id) { %>
                 <div class="autor-actions">
-                    <a href="/bancos/editar/<%= banco.id %>" class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem;">✏️ Editar Banco</a>
+                    <a href="/bancos/editar/<%= banco.id %>" class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem;">Editar Banco</a>
                     <form action="/bancos/eliminar/<%= banco.id %>" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar todo el simulador y sus preguntas?');" style="margin: 0;">
-                        <button type="submit" class="btn btn-danger" style="width: auto; padding: 0.5rem 1rem;">🗑️ Eliminar Banco</button>
+                        <button type="submit" class="btn btn-danger" style="width: auto; padding: 0.5rem 1rem;">Eliminar Banco</button>
                     </form>
                 </div>
             <% } %>
@@ -91,19 +91,19 @@
                 <h2 class="mt-2 text-white" style="margin: 0;">Simulador (Modo Examen)</h2>
                 <% if (preguntas.length > 0) { %>
                     <div id="examen-timer" style="background-color: var(--danger-color, #EF4444); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: bold; font-family: monospace; font-size: 1.25rem;">
-                        ⏱️ <span id="time-display">10:00</span>
+                        Tiempo: <span id="time-display">10:00</span>
                     </div>
                 <% } %>
             </div>
 
             <% if (typeof leaderboard !== 'undefined' && leaderboard.length > 0) { %>
                 <div class="leaderboard-card">
-                    <h3 class="leaderboard-title">🏆 Top 5 Mejores Intentos</h3>
+                    <h3 class="leaderboard-title">Top 5 Mejores Intentos</h3>
                     <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
                         <% leaderboard.forEach(function(intento, i) { %>
                             <li style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem;">
                                 <strong><span style="color: #f59e0b;">#<%= i + 1 %></span> <%= intento.nombre %></strong>
-                                <span><strong style="color: #10b981;"><%= intento.puntaje %>/<%= intento.total %></strong> aciertos en <%= intento.tiempo_segundos %>s ⏱️</span>
+                                <span><strong style="color: #10b981;"><%= intento.puntaje %>/<%= intento.total %></strong> aciertos en <%= intento.tiempo_segundos %>s</span>
                             </li>
                         <% }) %>
                     </ul>
@@ -121,7 +121,7 @@
                                 </h3>
                                 
                                 <% if (typeof user !== "undefined" && user.id === banco.autor_id) { %>
-                                    <button type="button" onclick="eliminarPregunta(<%= p.id %>)" style="background: none; border: none; color: #EF4444; width: auto; padding: 0.2rem 0.5rem; font-size: 1rem; cursor:pointer;" title="Eliminar Pregunta">🗑️</button>
+                                    <button type="button" onclick="eliminarPregunta(<%= p.id %>)" style="background: none; border: none; color: #EF4444; width: auto; padding: 0.2rem 0.5rem; font-size: 1rem; cursor:pointer;" title="Eliminar Pregunta">✕</button>
                                 <% } %>
                             </div>
 
@@ -170,7 +170,7 @@
                 <div class="card agregar-panel">
                     <div style="margin-bottom: 1.5rem;">
                         <h2 class="agregar-title">
-                            ➕ Agregar Nueva Pregunta
+                            Agregar Nueva Pregunta
                         </h2>
                     </div>
                     
@@ -195,8 +195,8 @@
                         </div>
 
                         <div style="margin-bottom: 1.25rem; display: flex; gap: 0.5rem;">
-                            <button type="button" id="btnAgregarOpcion" class="btn btn-secondary" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem;">➕ Agregar más opciones</button>
-                            <button type="button" id="btnQuitarOpcion" class="btn btn-danger" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem; display: none;">➖ Quitar última</button>
+                            <button type="button" id="btnAgregarOpcion" class="btn btn-secondary" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem;">Agregar más opciones</button>
+                            <button type="button" id="btnQuitarOpcion" class="btn btn-danger" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem; display: none;">Quitar última</button>
                         </div>
 
                         <div class="form-group">
@@ -286,7 +286,7 @@
 
                 const divResultado = document.getElementById('resultadoTexto');
                 divResultado.style.display = 'block';
-                divResultado.textContent = `🎯 Resultado: ${correctas} / ${total} correctas`;
+                divResultado.textContent = `Resultado: ${correctas} / ${total} correctas`;
                 btnRevisar.style.display = 'none'; 
 
                 // Detener timer y guardar en DB
@@ -309,7 +309,7 @@
                         })
                     }).then(res => res.json()).then(data => {
                         if (data.success) {
-                            divResultado.innerHTML += `<br><span style="font-size: 0.9rem; color: #D1FAE5; display: block; margin-top: 0.5rem;">✅ Guardado en el historial (${tiempoSegundos}s)</span>`;
+                            divResultado.innerHTML += `<br><span style="font-size: 0.9rem; color: #D1FAE5; display: block; margin-top: 0.5rem;">Guardado en el historial (${tiempoSegundos}s)</span>`;
                         }
                     }).catch(err => console.error('Error al guardar intento:', err));
                 }

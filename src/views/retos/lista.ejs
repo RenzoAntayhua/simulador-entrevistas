@@ -118,7 +118,7 @@
 
     <div class="container">
         <div style="display:flex; justify-content: space-between; align-items:center;">
-            <h2>🔥 Retos de Programación</h2>
+            <h2>Retos de Programación</h2>
             <a href="/retos/crear" class="btn-crear-reto">+ Crear Reto</a>
         </div>
         
@@ -155,7 +155,7 @@
                         <div class="reto-header">
                             <span class="dificultad dif-<%= diffLabel.toLowerCase() %>"><%= diffLabel %></span>
                             <% if (isResuelto) { %>
-                                <span class="resuelto-badge">✅ Resuelto</span>
+                                <span class="resuelto-badge">✔ Resuelto</span>
                             <% } %>
                         </div>
                         
@@ -179,9 +179,9 @@
                                 else if (diffLabel.includes('Dif') || diffLabel === 'Difícil') { rRam = '128MB'; rCpu = '60%'; rTime = '600s'; }
                             %>
                             <div class="reto-stats-bar">
-                                <span title="Memoria RAM Estimada">💾 <%= rRam %></span>
-                                <span title="Uso de CPU Estimado">⚡ <%= rCpu %></span>
-                                <span title="Tiempo Límite">⏱️ <%= rTime %></span>
+                                <span title="Memoria RAM Estimada">RAM: <%= rRam %></span>
+                                <span title="Uso de CPU Estimado">CPU: <%= rCpu %></span>
+                                <span title="Tiempo Límite">Tiempo: <%= rTime %></span>
                             </div>
                         </div>
                     </div>

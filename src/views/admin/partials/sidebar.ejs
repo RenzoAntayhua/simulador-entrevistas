@@ -10,17 +10,17 @@
     <button id="adminSidebarCloseBtn" class="admin-drawer-close-btn" style="display: none;">✕</button>
     <h3>Admin Panel</h3>
     <ul>
-        <li><a href="/admin" class="<%= currentPath === '/admin' ? 'active' : '' %>">📊 Dashboard</a></li>
-        <li><a href="/admin/usuarios" class="<%= currentPath && currentPath.startsWith('/admin/usuarios') ? 'active' : '' %>">👥 Usuarios</a></li>
-        <li><a href="/admin/retos" class="<%= currentPath && currentPath.startsWith('/admin/retos') ? 'active' : '' %>">🔥 Retos</a></li>
-        <li><a href="/admin/bancos" class="<%= currentPath && currentPath.startsWith('/admin/bancos') ? 'active' : '' %>">📚 Bancos</a></li>
-        <li><a href="/admin/reporte/pdf" target="_blank">📄 Reporte (PDF)</a></li>
-        <li><a href="/logout" class="btn-logout">🚪 Cerrar Sesión</a></li>
+        <li><a href="/admin" class="<%= currentPath === '/admin' ? 'active' : '' %>">Dashboard</a></li>
+        <li><a href="/admin/usuarios" class="<%= currentPath && currentPath.startsWith('/admin/usuarios') ? 'active' : '' %>">Usuarios</a></li>
+        <li><a href="/admin/retos" class="<%= currentPath && currentPath.startsWith('/admin/retos') ? 'active' : '' %>">Retos</a></li>
+        <li><a href="/admin/bancos" class="<%= currentPath && currentPath.startsWith('/admin/bancos') ? 'active' : '' %>">Bancos</a></li>
+        <li><a href="/admin/reporte/pdf" target="_blank">Reporte (PDF)</a></li>
+        <li><a href="/logout" class="btn-logout">Cerrar Sesión</a></li>
     </ul>
     
     <div style="padding: 15px 20px; margin-top: 10px;">
         <button id="adminThemeToggleBtn" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 500; transition: all 0.2s;">
-            <span id="adminThemeIcon">☀️</span> Modo Claro
+            Modo Claro
         </button>
     </div>
 </div>
@@ -39,7 +39,7 @@
         if (localStorage.getItem('theme') === 'light') {
             document.body.classList.add('light-theme');
             document.documentElement.classList.add('light-theme');
-            if (btn) btn.innerHTML = '🌙 Modo Oscuro';
+            if (btn) btn.innerHTML = 'Modo Oscuro';
         }
         
         btn?.addEventListener('click', () => {
@@ -47,10 +47,10 @@
             document.documentElement.classList.toggle('light-theme', isLight);
             if (isLight) {
                 localStorage.setItem('theme', 'light');
-                btn.innerHTML = '🌙 Modo Oscuro';
+                btn.innerHTML = 'Modo Oscuro';
             } else {
                 localStorage.setItem('theme', 'dark');
-                btn.innerHTML = '☀️ Modo Claro';
+                btn.innerHTML = 'Modo Claro';
             }
         });
 

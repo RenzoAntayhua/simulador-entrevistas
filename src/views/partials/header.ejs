@@ -15,7 +15,7 @@
     <div style="width: 24px;"></div>
 </div>
 <button id="themeToggleBtn" class="theme-floating-btn">
-    <span id="themeIcon">☀️</span> Modo Claro
+    Modo Claro
 </button>
 
 <nav>
@@ -25,17 +25,17 @@
         <strong style="text-align: center; color: #fff;">Simulador Exámenes Técnicos</strong>
     </div>
     <div>
-        <a href="/bancos" class="btn-crear <%= currentPath === '/bancos' || currentPath === '/' ? 'active' : '' %>">🏠 Inicio (Comunidad)</a>
-        <a href="/dashboard" class="btn-crear <%= currentPath && currentPath.startsWith('/dashboard') ? 'active' : '' %>">📚 Mis Bancos</a>
-        <a href="/retos" class="btn-crear <%= currentPath && currentPath.startsWith('/retos') ? 'active' : '' %>">🔥 Retos de Código</a>
-        <a href="/batalla" class="btn-crear <%= currentPath && currentPath.startsWith('/batalla') ? 'active' : '' %>">⚔️ Lobby</a>
-        <a href="/usuarios" class="btn-crear <%= currentPath && currentPath.startsWith('/usuarios') ? 'active' : '' %>">👥 Usuarios</a>
-        <a href="/amigos" class="btn-crear <%= currentPath && currentPath.startsWith('/amigos') ? 'active' : '' %>">👫 Amigos</a>
-        <a href="/certificados" class="btn-crear <%= currentPath && currentPath.startsWith('/certificados') ? 'active' : '' %>">🏆 Certificados</a>
-        <a href="#" onclick="openModal('tpl-crear-banco'); return false;" class="btn-crear">➕ Crear Banco</a>
-        <a href="#" onclick="openModal('tpl-crear-reto'); return false;" class="btn-crear">💡 Crear Reto</a>
+        <a href="/bancos" class="btn-crear <%= currentPath === '/bancos' || currentPath === '/' ? 'active' : '' %>">Inicio (Comunidad)</a>
+        <a href="/dashboard" class="btn-crear <%= currentPath && currentPath.startsWith('/dashboard') ? 'active' : '' %>">Mis Bancos</a>
+        <a href="/retos" class="btn-crear <%= currentPath && currentPath.startsWith('/retos') ? 'active' : '' %>">Retos de Código</a>
+        <a href="/batalla" class="btn-crear <%= currentPath && currentPath.startsWith('/batalla') ? 'active' : '' %>">Lobby</a>
+        <a href="/usuarios" class="btn-crear <%= currentPath && currentPath.startsWith('/usuarios') ? 'active' : '' %>">Usuarios</a>
+        <a href="/amigos" class="btn-crear <%= currentPath && currentPath.startsWith('/amigos') ? 'active' : '' %>">Amigos</a>
+        <a href="/certificados" class="btn-crear <%= currentPath && currentPath.startsWith('/certificados') ? 'active' : '' %>">Certificados</a>
+        <a href="#" onclick="openModal('tpl-crear-banco'); return false;" class="btn-crear">+ Crear Banco</a>
+        <a href="#" onclick="openModal('tpl-crear-reto'); return false;" class="btn-crear">Crear Reto</a>
 
-        <a href="/logout" class="btn-logout">🚪 Cerrar Sesión</a>
+        <a href="/logout" class="btn-logout">Cerrar Sesión</a>
     </div>
 </nav>
 
@@ -44,7 +44,7 @@
     if (localStorage.getItem('theme') === 'light') {
         document.body.classList.add('light-theme');
         const btnText = document.getElementById('themeToggleBtn');
-        if (btnText) btnText.innerHTML = '🌙 Modo Oscuro';
+        if (btnText) btnText.innerHTML = 'Modo Oscuro';
     }
 
     document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
@@ -54,10 +54,10 @@
         const btnText = document.getElementById('themeToggleBtn');
         if (isLight) {
             localStorage.setItem('theme', 'light');
-            btnText.innerHTML = '🌙 Modo Oscuro';
+            btnText.innerHTML = 'Modo Oscuro';
         } else {
             localStorage.setItem('theme', 'dark');
-            btnText.innerHTML = '☀️ Modo Claro';
+            btnText.innerHTML = 'Modo Claro';
         }
 
         // Emitir un evento global por si hay un editor Monaco en la vista
@@ -102,12 +102,12 @@
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         
-        let icon = 'ℹ️';
-        if (type === 'success') icon = '✅';
-        if (type === 'error') icon = '❌';
-        if (type === 'warning') icon = '⚠️';
+        let icon = 'i';
+        if (type === 'success') icon = '✓';
+        if (type === 'error') icon = '✗';
+        if (type === 'warning') icon = '!';
         
-        toast.innerHTML = `<span style="font-size: 18px;">${icon}</span> <span>${message}</span>`;
+        toast.innerHTML = `<span style="font-size: 18px; font-weight: bold; margin-right: 5px;">${icon}</span> <span>${message}</span>`;
         container.appendChild(toast);
         
         // Trigger reflow

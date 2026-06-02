@@ -156,11 +156,11 @@
             overlay.style.display = 'flex';
             
             if (ganador.id === usuario.id) {
-                texto.textContent = porDesconexion ? '🏆 ¡GANASTE! (Abandono)' : '🏆 ¡GANASTE!';
+                texto.textContent = porDesconexion ? '¡GANASTE! (Abandono)' : '¡GANASTE!';
                 texto.style.color = '#22c55e';
                 document.getElementById('btn-certificado').style.display = 'inline-block';
             } else {
-                texto.textContent = '😔 Perdiste';
+                texto.textContent = 'Perdiste';
                 texto.style.color = '#ef4444';
             }
         });
@@ -237,7 +237,7 @@
                     if (!data || data.status.id !== 3) {
                         allTestsPassed = false;
                         let errStr = data.compile_output || data.stderr || data.status.description;
-                        consoleDiv.innerHTML += `❌ Error o test fallido en ejecución: ${errStr}\n`;
+                        consoleDiv.innerHTML += `Error o test fallido en ejecución: ${errStr}\n`;
                         break;
                     }
                     
@@ -245,19 +245,19 @@
                     let expectedClear = (test.output_esperado || '').replace(/\\/g, '').replace(/"/g, '').trim();
                     if (stdoutClear !== expectedClear) {
                         allTestsPassed = false;
-                        consoleDiv.innerHTML += `❌ Test falló: Esperado ${expectedClear}, Obtenido ${stdoutClear}\n`;
+                        consoleDiv.innerHTML += `Test falló: Esperado ${expectedClear}, Obtenido ${stdoutClear}\n`;
                         break;
                     }
                 }
                 
                 if (allTestsPassed) {
-                    consoleDiv.innerHTML += `\n🎉 ¡CÓDIGO CORRECTO! Declarando victoria...\n`;
+                    consoleDiv.innerHTML += `\n¡CÓDIGO CORRECTO! Declarando victoria...\n`;
                     onRetoCompletado();
                 } else {
-                    consoleDiv.innerHTML += `\n⚠️ Sigue intentándolo.\n`;
+                    consoleDiv.innerHTML += `\nSigue intentándolo.\n`;
                 }
             } catch(e) {
-                consoleDiv.innerHTML += `❌ Error de conexión al evaluar.\n`;
+                consoleDiv.innerHTML += `Error de conexión al evaluar.\n`;
             }
             btnRun.disabled = false;
             btnRun.classList.remove('loading');

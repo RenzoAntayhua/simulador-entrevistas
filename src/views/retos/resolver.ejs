@@ -39,19 +39,19 @@
                     
                     <div class="header-meta">
                         <span class="badge badge-<%= reto.dificultad.replace('í', 'i') %>"><%= reto.dificultad %></span>
-                        <span class="badge badge-Exitoso">🏆 <%= reto.puntos %> Puntos</span>
-                        <span class="badge badge-Medio">🔄 Tus intentos: <%= typeof intentosTotales !== 'undefined' ? intentosTotales : 0 %></span>
+                        <span class="badge badge-Exitoso"><%= reto.puntos %> Puntos</span>
+                        <span class="badge badge-Medio">Tus intentos: <%= typeof intentosTotales !== 'undefined' ? intentosTotales : 0 %></span>
                     </div>
                     
                     <form action="/retos/calificar" method="POST" class="auth-card" style="padding: 12px; margin-bottom: 20px; display: inline-block;">
                         <input type="hidden" name="reto_id" value="<%= reto.id %>">
                         <label style="font-weight:bold; margin-right:10px; font-size:0.9em; display: inline-block;">Calificar reto:</label>
                         <select name="estrellas" style="width: auto; padding: 4px 8px; margin-right: 10px;">
-                            <option value="5">5 ⭐ Excelente</option>
-                            <option value="4">4 ⭐ Muy bueno</option>
-                            <option value="3">3 ⭐ Bueno</option>
-                            <option value="2">2 ⭐ Regular</option>
-                            <option value="1">1 ⭐ Malo</option>
+                            <option value="5">5 ★ Excelente</option>
+                            <option value="4">4 ★ Muy bueno</option>
+                            <option value="3">3 ★ Bueno</option>
+                            <option value="2">2 ★ Regular</option>
+                            <option value="1">1 ★ Malo</option>
                         </select>
                         <button type="submit" class="btn" style="width: auto; padding: 4px 12px;">Votar</button>
                     </form>
@@ -60,7 +60,7 @@
                     <p class="descripcion" style="font-size: 14px;"><%= reto.enunciado %></p>
                     
                     <% if (reto.pista) { %>
-                        <button class="btn-secondary" onclick="togglePista()">💡 Ver Pista</button>
+                        <button class="btn-secondary" onclick="togglePista()">Ver Pista</button>
                         <div id="pista-box" class="casos-container" style="display: none; margin-top: 10px;">
                             <strong>Pista:</strong> <%= reto.pista %>
                         </div>
@@ -95,7 +95,7 @@
                 </div>
 
                 <div class="leaderboard glass-effect" style="padding: 20px; border-radius: 10px; border: 1px solid #1c1c1c; margin-top: 20px;">
-                    <h3>🎖️ Top 5 Soluciones Exitosas</h3>
+                    <h3>Top 5 Soluciones Exitosas</h3>
                     <ul>
                         <% if(leaderboard.length === 0) { %>
                             <li>Aún nadie ha resuelto este reto. ¡Sé el primero!</li>
@@ -108,14 +108,14 @@
             </div>
 
             <div class="right-panel">                <div id="timer-container" style="background: #1a1a1c; padding: 12px 15px; border-radius: 8px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                    <span style="font-weight: bold; color: #f1f1f1; font-size: 0.9em;">⏱️ Tiempo Restante:</span>
+                    <span style="font-weight: bold; color: #f1f1f1; font-size: 0.9em;">Tiempo Restante:</span>
                     <span id="countdown" style="font-family: monospace; font-size: 1.4em; color: #22c55e; font-weight: bold; letter-spacing: 1px;">--:--</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h3 style="margin: 0;">Tu Código (<%= reto.lenguaje %>)</h3>
                     <div class="btn-group" style="margin: 0;">
-                        <button class="btn-run" onclick="runCode()">▶ Ejecutar Pruebas</button>
-                        <button class="btn-reset" onclick="resetCode()">🔄 Resetear</button>
+                        <button class="btn-run" onclick="runCode()">Ejecutar Pruebas</button>
+                        <button class="btn-reset" onclick="resetCode()">Resetear</button>
                     </div>
                 </div>
                 <!-- Contenedor de Monaco Editor -->
@@ -156,7 +156,7 @@
                 
                 // Mostrar alerta y redirigir
                 setTimeout(() => {
-                    showToast('⏰ ¡Tiempo agotado! No pudiste resolver el reto a tiempo.', 'warning');
+                    showToast('¡Tiempo agotado! No pudiste resolver el reto a tiempo.', 'warning');
                     setTimeout(() => {
                         window.location.href = '/retos';
                     }, 3000);
@@ -224,7 +224,7 @@
                 const result = await response.json();
 
                 if (result.error) {
-                    consoleDiv.innerHTML += `\n❌ ERROR: ${result.error}\n`;
+                    consoleDiv.innerHTML += `\nERROR: ${result.error}\n`;
                     if (result.details) consoleDiv.innerHTML += `Detalles: ${result.details}\n`;
                 } else {
                     consoleDiv.innerHTML += result.executionOutput;
@@ -234,7 +234,7 @@
                     }
                 }
             } catch (err) {
-                consoleDiv.innerHTML += `\n❌ ERROR AL COMUNICARSE CON EL SERVIDOR:\n${err.message}`;
+                consoleDiv.innerHTML += `\nERROR AL COMUNICARSE CON EL SERVIDOR:\n${err.message}`;
             } finally {
                 // Detener animaciones
                 btnRun.disabled = false;

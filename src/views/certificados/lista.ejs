@@ -94,7 +94,7 @@
 <body>
     <%- include('../partials/header') %>
     <div class="container">
-        <h2 style="text-align: center; margin-bottom: 40px;">🏆 Mis Certificados de Excelencia</h2>
+        <h2 style="text-align: center; margin-bottom: 40px;">Mis Certificados de Excelencia</h2>
         <script>
             function copiarEnlace(certId) {
                 const url = window.location.origin + '/c/' + certId;
@@ -116,7 +116,7 @@
                 const text = encodeURIComponent('¡He demostrado mis habilidades técnicas en TechSim Solutions! Mira mi certificado:');
                 
                 if (network === 'linkedin') {
-                    const linkedinText = `¡Emocionado de compartir que acabo de superar una evaluación técnica oficial de ingeniería de software validada por TechSim Solutions! 🚀💻\n\nPuedes verificar mis competencias y mi certificado oficial en el siguiente enlace:\n${baseUrl}\n\n#TechSimSolutions #SoftwareEngineering #CodingChallenge #Certificacion`;
+                    const linkedinText = `¡Emocionado de compartir que acabo de superar una evaluación técnica oficial de ingeniería de software validada por TechSim Solutions!\n\nPuedes verificar mis competencias y mi certificado oficial en el siguiente enlace:\n${baseUrl}\n\n#TechSimSolutions #SoftwareEngineering #CodingChallenge #Certificacion`;
                     navigator.clipboard.writeText(linkedinText).then(() => {
                         alert('¡Texto profesional copiado al portapapeles!\n\nSolo presiona "Pegar" (Ctrl+V) cuando se abra la ventana de LinkedIn para publicar tu logro.');
                         window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=800,height=600');
@@ -143,22 +143,22 @@
             <div class="certs-grid">
                 <% certificados.forEach(c => { %>
                     <div class="cert-card">
-                        <div class="cert-icon">📜</div>
+                        <div class="cert-icon" style="font-size: 24px; font-weight: bold; border: 2px solid var(--primary); width: 60px; height: 60px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto 15px; color: var(--primary);">✓</div>
                         <h3 class="cert-title">Victorioso</h3>
                         <p class="cert-reto"><strong>Reto:</strong> <%= c.reto_titulo %></p>
                         <p class="cert-oponente">Derrotaste a: <%= c.oponente_nombre %></p>
                         <p class="cert-fecha">Fecha: <%= new Date(c.fecha).toLocaleDateString() %></p>
                         
                         <div class="share-container">
-                            <a href="/certificados/<%= c.id %>/pdf" target="_blank" class="btn" style="background: #eab308; color: #000; flex: 1; white-space: nowrap; text-align: center;">⬇️ PDF</a>
-                            <button onclick="copiarEnlace('<%= c.id %>')" class="btn" style="flex: 1; white-space: nowrap;">🔗 Copiar</button>
+                            <a href="/certificados/<%= c.id %>/pdf" target="_blank" class="btn" style="background: #eab308; color: #000; flex: 1; white-space: nowrap; text-align: center;">PDF</a>
+                            <button onclick="copiarEnlace('<%= c.id %>')" class="btn" style="flex: 1; white-space: nowrap;">Copiar</button>
                             <button onclick="toggleShareMenu('<%= c.id %>')" class="btn" style="background: #2a2a35; padding: 10px 15px;">⋮</button>
                             
                             <div id="share-menu-<%= c.id %>" class="share-menu">
-                                <a href="#" onclick="shareTo('whatsapp', '<%= c.id %>'); return false;"><span style="color:#25D366;">📱</span> WhatsApp</a>
-                                <a href="#" onclick="shareTo('telegram', '<%= c.id %>'); return false;"><span style="color:#0088cc;">✈️</span> Telegram</a>
-                                <a href="#" onclick="shareTo('linkedin', '<%= c.id %>'); return false;"><span style="color:#0a66c2;">💼</span> LinkedIn</a>
-                                <a href="#" onclick="shareTo('facebook', '<%= c.id %>'); return false;"><span style="color:#1877f2;">👍</span> Facebook</a>
+                                <a href="#" onclick="shareTo('whatsapp', '<%= c.id %>'); return false;">WhatsApp</a>
+                                <a href="#" onclick="shareTo('telegram', '<%= c.id %>'); return false;">Telegram</a>
+                                <a href="#" onclick="shareTo('linkedin', '<%= c.id %>'); return false;">LinkedIn</a>
+                                <a href="#" onclick="shareTo('facebook', '<%= c.id %>'); return false;">Facebook</a>
                             </div>
                         </div>
                     </div>
@@ -166,7 +166,7 @@
             </div>
         <% } else { %>
             <div class="certs-empty">
-                <span class="certs-empty-icon">🏆</span>
+                <span class="certs-empty-icon" style="font-size: 48px; display: block; margin-bottom: 20px;">✓</span>
                 <h3>Aún no has ganado ningún reto.</h3>
                 <p>¡Ve al Lobby, reta a alguien en 1v1 y consigue tu primer certificado!</p>
                 <a href="/batalla" class="btn" style="margin-top: 20px;">Ir al Lobby</a>
