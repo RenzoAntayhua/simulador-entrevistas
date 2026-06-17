@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte — <%= sesion.puesto %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="margin:0;">
+<%- include('../partials/header') %>
+<%- include('../partials/modals') %>
+
+<%
+    const nota = reporte.nota || 0;
+    const porcentaje = Math.round((nota / 20) * 100);
+    const colorNota = nota >= 14 ? 'var(--success)' : (nota >= 11 ? 'var(--warning)' : 'var(--destructive)');
+    const bgNota = nota >= 14 ? 'rgba(34,197,94,0.1)' : (nota >= 11 ? 'rgba(234,179,8,0.1)' : 'rgba(239,68,68,0.1)');
+    const borderNota = nota >= 14 ? 'rgba(34,197,94,0.3)' : (nota >= 11 ? 'rgba(234,179,8,0.3)' : 'rgba(239,68,68,0.3)');
+%>
+
+<main class="main-content">
+
+    <!-- Módulo header -->
+    <div class="module-header">
+        <div class="module-header__icon module-header__icon--violet">📋</div>
+        <div>
+            <div class="module-header__title">Reporte de Entrevista</div>
+            <div class="module-header__sub"><%= sesion.puesto %> · <%= nombre %></div>
+        </div>
+    </div>
+
+    <!-- Nota grande + badges -->
+    <div class="card" style="background:<%= bgNota %>; border-color:<%= borderNota %>; padding:28px; text-align:center; margin-bottom:20px;">
+        <div style="font-size:56px; font-weight:900; color:<%= colorNota %>; line-height:1; margin-bottom:8px;"><%= nota.toFixed(1) %></div>
+        <div style="font-size:14px; color:#a1a1aa; margin-bottom:14px;">/ 20 puntos</div>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+            <span class="badge" style="font-size:13px; padding: 6px 16px;"><%= reporte.nivel_alcanzado || '' %></span>
+            <% if (reporte.contrataria) { %>
+                <span style="background: rgba(34,197,94,0.15); color:var(--success); border:1px solid rgba(34,197,94,0.3); border-radius:9999px; padding:6px 16px; font-size:13px; font-weight:600;">✓ Recomendado</span>
+            <% } else { %>
+                <span style="background: rgba(239,68,68,0.15); color:var(--destructive); border:1px solid rgba(239,68,68,0.3); border-radius:9999px; padding:6px 16px; font-size:13px; font-weight:600;">✗ No Recomendado</span>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Resumen -->
+    <% if (reporte.resumen) { %>
+    <div class="card" style="margin-bottom:16px;">
+        <h3 style="margin-bottom:10px; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:#71717a;">💬 Resumen</h3>
+        <p style="font-size:14px; color:#e2e2e2; line-height:1.7; margin:0;"><%= reporte.resumen %></p>
+    </div>
+    <% } %>
+
+    <!-- Evaluación por área -->
+    <% if (reporte.evaluacion_por_area && reporte.evaluacion_por_area.length > 0) { %>
+    <div class="card" style="margin-bottom:16px;">
+        <h3 style="margin-bottom:16px; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:#71717a;">📊 Evaluación por Área</h3>
+        <% reporte.evaluacion_por_area.forEach(area => {
+            const max = area.puntaje_maximo || area.maximo || 20;
+            const pts = area.puntaje || 0;
+            const porc = Math.round((pts / max) * 100);
+            const barColor = porc >= 70 ? 'var(--success)' : (porc >= 50 ? 'var(--warning)' : 'var(--destructive)');
+        %>
+        <div style="margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="font-size:13px; font-weight:500; color:#f4f4f5;"><%= area.area %></span>
+                <span style="font-size:13px; font-weight:700; color:<%= barColor %>;"><%= pts %>/<%= max %></span>
+            </div>
+            <div style="background:#1c1c1c; border-radius:4px; height:6px; overflow:hidden; margin-bottom:5px;">
+                <div class="area-bar-fill" data-width="<%= porc %>%" style="height:100%; border-radius:4px; background:<%= barColor %>; width:0; transition: width 1s ease;"></div>
+            </div>
+            <% if (area.comentario) { %>
+                <div style="font-size:12px; color:#71717a; font-style:italic;"><%= area.comentario %></div>
+            <% } %>
+        </div>
+        <% }) %>
+    </div>
+    <% } %>
+
+    <!-- Fortalezas y Debilidades -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+        <div class="card" style="margin-bottom:0;">
+            <h3 style="margin-bottom:12px; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--success);">✅ Fortalezas</h3>
+            <% (reporte.fortalezas || []).forEach(f => { %>
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <span style="color:var(--success); flex-shrink:0; margin-top:1px;">▸</span>
+                    <span style="font-size:13px; color:#e2e2e2; line-height:1.5;"><%= f %></span>
+                </div>
+            <% }) %>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+            <h3 style="margin-bottom:12px; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--destructive);">❌ Áreas de Mejora</h3>
+            <% (reporte.debilidades || []).forEach(d => { %>
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <span style="color:var(--destructive); flex-shrink:0; margin-top:1px;">▸</span>
+                    <span style="font-size:13px; color:#e2e2e2; line-height:1.5;"><%= d %></span>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+
+    <!-- Recomendación -->
+    <% if (reporte.recomendacion) { %>
+    <div class="card" style="border-left:3px solid var(--primary); margin-bottom:16px;">
+        <h3 style="margin-bottom:8px; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--primary);">💡 Recomendación</h3>
+        <p style="font-size:14px; color:#e2e2e2; line-height:1.7; margin:0;"><%= reporte.recomendacion %></p>
+    </div>
+    <% } %>
+
+    <!-- Historial colapsable -->
+    <div class="card" style="margin-bottom:20px;">
+        <div onclick="toggleHistorial()" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:#71717a;">📝 Historial completo de la entrevista</h3>
+            <span id="toggleIcon" style="color:var(--primary); font-size:13px;">▶ Ver</span>
+        </div>
+        <div id="historialContent" style="display:none; margin-top:16px; border-top:1px solid #1c1c1c; padding-top:16px;">
+            <% historial.forEach((h, i) => { %>
+            <div style="margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #1c1c1c;">
+                <div style="font-size:12px; color:var(--primary); font-weight:600; margin-bottom:6px;">Pregunta <%= i+1 %>: <%= h.pregunta %></div>
+                <div style="background:#121212; border:1px solid #1c1c1c; border-radius:7px; padding:10px 14px; font-size:13px; color:#a1a1aa; line-height:1.6;"><%= h.respuesta %></div>
+            </div>
+            <% }) %>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="/entrevista/<%= sesion.id %>/pdf" target="_blank" class="btn" style="flex:1; min-width:140px; text-align:center; text-decoration:none; padding:11px 16px;">
+            📄 Descargar PDF
+        </a>
+        <a href="/entrevista/iniciar" class="btn btn-secondary" style="flex:1; min-width:140px; text-align:center; text-decoration:none; padding:11px 16px;">
+            🔄 Nueva Entrevista
+        </a>
+        <a href="/entrevista" class="btn btn-secondary" style="flex:1; min-width:140px; text-align:center; text-decoration:none; padding:11px 16px;">
+            📋 Mis Entrevistas
+        </a>
+    </div>
+
+</main>
+
+<script>
+    window.addEventListener('load', () => {
+        document.querySelectorAll('.area-bar-fill').forEach(bar => {
+            const w = bar.getAttribute('data-width');
+            setTimeout(() => { bar.style.width = w; }, 400);
+        });
+    });
+    function toggleHistorial() {
+        const el = document.getElementById('historialContent');
+        const icon = document.getElementById('toggleIcon');
+        const open = el.style.display === 'none';
+        el.style.display = open ? 'block' : 'none';
+        icon.textContent = open ? '▼ Ocultar' : '▶ Ver';
+    }
+</script>
+</body>
+</html>

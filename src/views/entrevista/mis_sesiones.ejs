@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Entrevistas</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="margin:0;">
+<%- include('../partials/header') %>
+<%- include('../partials/modals') %>
+
+<main class="main-content">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+        <div class="module-header" style="margin-bottom:0;">
+            <div class="module-header__icon module-header__icon--violet">🤖</div>
+            <div>
+                <div class="module-header__title">Mis Entrevistas</div>
+                <div class="module-header__sub">Historial de tus entrevistas virtuales con IA</div>
+            </div>
+        </div>
+        <a href="/entrevista/iniciar" class="btn" style="text-decoration:none; padding:9px 20px;">
+            + Nueva Entrevista
+        </a>
+    </div>
+
+    <% if (sesiones.length === 0) { %>
+        <div class="card" style="text-align:center; padding:48px 24px; border-style:dashed;">
+            <div style="font-size:3rem; margin-bottom:16px;">🎤</div>
+            <h3 style="color:#f4f4f5; margin-bottom:8px;">Aún no tienes entrevistas</h3>
+            <p style="margin-bottom:20px;">¡Inicia tu primera entrevista virtual y descubre qué tan preparado estás!</p>
+            <a href="/entrevista/iniciar" class="btn" style="text-decoration:none; display:inline-block; padding:10px 24px;">Iniciar mi primera entrevista</a>
+        </div>
+    <% } else { %>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+        <% sesiones.forEach(s => {
+            const nota = s.nota_final;
+            let colorNota = '#a1a1aa';
+            let textoNota = '▶';
+            if (nota !== null) {
+                textoNota = parseFloat(nota).toFixed(1);
+                colorNota = nota >= 14 ? 'var(--success)' : (nota >= 11 ? 'var(--warning)' : 'var(--destructive)');
+            }
+            const url = s.estado === 'completada' ? `/entrevista/${s.id}/reporte` : `/entrevista/${s.id}`;
+            const fecha = new Date(s.fecha).toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric' });
+        %>
+            <a href="<%= url %>" style="text-decoration:none;">
+                <div class="card" style="display:flex; align-items:center; gap:16px; padding:16px 18px; transition:border-color 0.15s, transform 0.15s; margin-bottom:0;">
+                    <!-- Nota circle -->
+                    <div style="width:50px; height:50px; border-radius:50%; background:#121212; border:2px solid <%= colorNota %>; display:flex; align-items:center; justify-content:center; font-size:<%= nota !== null ? '14px' : '18px' %>; font-weight:800; color:<%= colorNota %>; flex-shrink:0;">
+                        <%= textoNota %>
+                    </div>
+                    <!-- Info -->
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:14px; font-weight:600; color:#f4f4f5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><%= s.puesto %></div>
+                        <div style="font-size:12px; color:#71717a; margin-top:2px;"><%= fecha %></div>
+                    </div>
+                    <!-- Estado -->
+                    <% if (s.estado === 'completada') { %>
+                        <span class="badge" style="background:rgba(34,197,94,0.1); color:var(--success); border-color:rgba(34,197,94,0.25); white-space:nowrap;">✓ Completada</span>
+                    <% } else { %>
+                        <span class="badge" style="white-space:nowrap;">⏳ En curso</span>
+                    <% } %>
+                </div>
+            </a>
+        <% }) %>
+        </div>
+    <% } %>
+
+</main>
+</body>
+</html>

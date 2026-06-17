@@ -123,6 +123,7 @@ router.use('/bancos', require('./bancosRoutes'));
 router.use('/retos', require('./retosRoutes'));
 router.use('/preguntas', require('./preguntasRoutes'));
 router.use('/admin', require('./adminRoutes'));
+router.use('/entrevista', require('./entrevistaRoutes'));
 
 // ==========================================
 // 1V1 BATALLAS, AMIGOS Y CERTIFICADOS (Sin Modularizar por ahora)

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrevistador IA — Iniciar</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="margin:0;">
+<%- include('../partials/header') %>
+
+<main class="main-content">
+
+    <!-- Encabezado de módulo -->
+    <div class="module-header">
+        <div class="module-header__icon module-header__icon--violet">🤖</div>
+        <div>
+            <div class="module-header__title">Entrevistador Virtual IA</div>
+            <div class="module-header__sub">5 preguntas técnicas adaptativas · Reporte con nota y recomendaciones</div>
+        </div>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+    <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 12px 16px; color: #f87171; margin-bottom: 20px; font-size: 14px;">
+        ⚠️ <%= error %>
+    </div>
+    <% } %>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+
+        <!-- Formulario -->
+        <div class="card" style="padding: 28px;">
+            <h2 style="margin-bottom: 4px; font-size: 16px; font-weight: 600;">Nueva Entrevista</h2>
+            <p style="margin-bottom: 24px; font-size: 13px;">Configura tu entrevista y la IA generará preguntas adaptadas a tu perfil.</p>
+
+            <form action="/entrevista/iniciar" method="POST" id="formIniciar">
+                <div class="form-group">
+                    <label for="inputPuesto">¿A qué puesto postulas?</label>
+                    <input
+                        type="text"
+                        name="puesto"
+                        id="inputPuesto"
+                        placeholder="Ej: Backend Developer Node.js, Frontend React, DevOps AWS..."
+                        required
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label>Nivel de experiencia</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 4px;">
+                        <button type="button" class="nivel-opt active" onclick="setNivel('Junior', this)">🌱 Junior</button>
+                        <button type="button" class="nivel-opt" onclick="setNivel('Mid', this)">⚡ Mid</button>
+                        <button type="button" class="nivel-opt" onclick="setNivel('Senior', this)">🔥 Senior</button>
+                    </div>
+                    <input type="hidden" name="nivel" id="nivelInput" value="Junior">
+                </div>
+
+                <button type="submit" class="btn" id="btnIniciar" style="width: 100%; padding: 11px; font-size: 14px; margin-top: 8px;">
+                    🚀 Iniciar Entrevista
+                </button>
+            </form>
+        </div>
+
+        <!-- Cómo funciona -->
+        <div>
+            <div class="card" style="margin-bottom: 12px;">
+                <h3 style="margin-bottom: 16px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">¿Cómo funciona?</h3>
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <div style="width:28px; height:28px; background: var(--primary-subtle); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--primary); flex-shrink:0;">1</div>
+                        <div>
+                            <div style="font-weight:600; font-size:13px; color:#f4f4f5; margin-bottom:2px;">Escribe el puesto y nivel</div>
+                            <div style="font-size:12px; color:#a1a1aa;">Especifica el rol que buscas. Mientras más detallado, mejor.</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <div style="width:28px; height:28px; background: var(--primary-subtle); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--primary); flex-shrink:0;">2</div>
+                        <div>
+                            <div style="font-weight:600; font-size:13px; color:#f4f4f5; margin-bottom:2px;">Responde 5 preguntas técnicas</div>
+                            <div style="font-size:12px; color:#a1a1aa;">La IA adapta cada pregunta basándose en tus respuestas anteriores.</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <div style="width:28px; height:28px; background: var(--primary-subtle); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--primary); flex-shrink:0;">3</div>
+                        <div>
+                            <div style="font-weight:600; font-size:13px; color:#f4f4f5; margin-bottom:2px;">Recibe tu reporte detallado</div>
+                            <div style="font-size:12px; color:#a1a1aa;">Nota sobre 20, fortalezas, debilidades y recomendaciones. Exportable a PDF.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/entrevista" style="display:block; text-align:center; color: var(--text-muted); font-size:13px; text-decoration:none; padding: 10px;">
+                Ver mis entrevistas anteriores →
+            </a>
+        </div>
+    </div>
+
+</main>
+
+<style>
+    .nivel-opt {
+        background: #0f0f0f;
+        border: 1px solid #27272a;
+        color: #a1a1aa;
+        border-radius: 7px;
+        padding: 9px 6px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: 'Inter', sans-serif;
+    }
+    .nivel-opt:hover {
+        border-color: #6366f1;
+        color: #f1f1f1;
+        background: rgba(99,102,241,0.08);
+    }
+    .nivel-opt.active {
+        border-color: #6366f1;
+        background: rgba(99,102,241,0.15);
+        color: #818cf8;
+        font-weight: 600;
+    }
+</style>
+
+<script>
+    function setNivel(valor, el) {
+        document.querySelectorAll('.nivel-opt').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('nivelInput').value = valor;
+    }
+    document.getElementById('formIniciar').addEventListener('submit', function() {
+        const btn = document.getElementById('btnIniciar');
+        btn.disabled = true;
+        btn.textContent = '⏳ Preparando entrevista...';
+    });
+</script>
+</body>
+</html>

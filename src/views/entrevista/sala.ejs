@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrevista — <%= sesion.puesto %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="margin:0;">
+<%- include('../partials/header') %>
+<%- include('../partials/modals') %>
+
+<main class="main-content">
+
+    <!-- Encabezado con puesto y progreso -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div class="module-header" style="margin-bottom:0;">
+            <div class="module-header__icon module-header__icon--violet">🤖</div>
+            <div>
+                <div class="module-header__title"><%= sesion.puesto %></div>
+                <div class="module-header__sub">Entrevista técnica adaptativa con IA</div>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size:12px; color:#a1a1aa;">Pregunta</span>
+            <div style="background:#1c1c1c; border-radius:999px; padding:4px 14px; font-size:13px; font-weight:700; color: var(--primary);" id="progresoNum">
+                <%= numPreguntaActual %> / <%= totalPreguntas %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div style="background:#1c1c1c; border-radius:4px; height:4px; margin-bottom:28px; overflow:hidden;">
+        <div id="progresoFill" style="height:100%; background: var(--primary); border-radius:4px; transition: width 0.5s ease; width:<%= Math.round((numPreguntaActual / totalPreguntas) * 100) %>%;"></div>
+    </div>
+
+    <!-- Historial de conversación -->
+    <div id="chatHistorial" style="display:flex; flex-direction:column; gap:16px; margin-bottom:24px;">
+        <% historial.forEach((h, i) => { %>
+            <% if (i < historial.length - 1 && h.respuesta) { %>
+                <!-- Pregunta resuelta -->
+                <div class="card" style="border-left: 3px solid var(--primary); padding: 16px 18px;">
+                    <div style="font-size:11px; color: var(--primary); font-weight:600; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">🤖 Pregunta <%= i + 1 %></div>
+                    <div style="font-size:14px; color:#f4f4f5; font-weight:500; margin-bottom:12px; line-height:1.6;"><%= h.pregunta %></div>
+                    <div style="background:#121212; border: 1px solid #27272a; border-radius:7px; padding:10px 14px;">
+                        <div style="font-size:11px; color:#71717a; margin-bottom:4px;">Tu respuesta:</div>
+                        <div style="font-size:13px; color:#a1a1aa; line-height:1.6;"><%= h.respuesta %></div>
+                    </div>
+                </div>
+            <% } else if (i === historial.length - 1) { %>
+                <!-- Pregunta activa -->
+                <div class="card" style="border-left: 3px solid var(--primary); padding: 18px 20px; background: rgba(99,102,241,0.06);" id="preguntaActiva">
+                    <div style="font-size:11px; color: var(--primary); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">🤖 Pregunta <%= i + 1 %> — Ahora</div>
+                    <div style="font-size:15px; color:#ffffff; font-weight:600; line-height:1.7;" id="textoPreguntaActual"><%= h.pregunta %></div>
+                </div>
+            <% } %>
+        <% }) %>
+    </div>
+
+    <!-- Área de respuesta -->
+    <div class="card" style="padding:20px;" id="areaRespuesta">
+        <div class="form-group" style="margin-bottom:12px;">
+            <label for="respuestaTextarea" style="font-size:13px; color:#a1a1aa;">✏️ Tu respuesta <span style="color:#71717a; font-weight:400;">(Ctrl+Enter para enviar)</span></label>
+            <textarea
+                id="respuestaTextarea"
+                name="respuesta"
+                placeholder="Escribe tu respuesta aquí de forma clara y detallada..."
+                rows="5"
+                style="resize:vertical; min-height:110px;"
+            ></textarea>
+        </div>
+        <button class="btn" id="btnEnviar" onclick="enviarRespuesta()" style="width:100%; padding:11px; font-size:14px;">
+            Enviar Respuesta →
+        </button>
+
+        <!-- Indicator IA pensando -->
+        <div id="thinkingIndicator" style="display:none; align-items:center; gap:10px; margin-top:12px; padding:10px 14px; background:#0a0a0a; border:1px solid #1c1c1c; border-radius:7px;">
+            <div style="display:inline-flex; gap:5px;" id="dotAnim">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <span style="font-size:13px; color:#a1a1aa;">La IA está generando la siguiente pregunta...</span>
+        </div>
+    </div>
+
+</main>
+
+<style>
+    .dot {
+        display: inline-block;
+        width: 7px; height: 7px;
+        background: var(--primary);
+        border-radius: 50%;
+        animation: dotPulse 1.2s infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse {
+        0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+        40% { opacity: 1; transform: scale(1); }
+    }
+    .msg-slide-in {
+        animation: fadeUp 0.35s ease;
+    }
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<script>
+    const sesionId = '<%= sesion.id %>';
+    let numPreguntaActual = <%= numPreguntaActual %>;
+    const totalPreguntas = <%= totalPreguntas %>;
+
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+    async function enviarRespuesta() {
+        const textarea = document.getElementById('respuestaTextarea');
+        const respuesta = textarea.value.trim();
+
+        if (!respuesta) {
+            showToast('Escribe tu respuesta antes de continuar.', 'warning');
+            return;
+        }
+
+        const btn = document.getElementById('btnEnviar');
+        const thinking = document.getElementById('thinkingIndicator');
+
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+        thinking.style.display = 'flex';
+        textarea.disabled = true;
+
+        try {
+            const res = await fetch(`/entrevista/${sesionId}/responder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ respuesta })
+            });
+            const data = await res.json();
+
+            if (!data.success) {
+                showToast(data.error || 'Error al procesar la respuesta.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Enviar Respuesta →';
+                thinking.style.display = 'none';
+                textarea.disabled = false;
+                return;
+            }
+
+            if (data.finalizado) {
+                btn.textContent = '🎉 Generando reporte...';
+                window.location.href = data.redirectUrl;
+                return;
+            }
+
+            // Convertir pregunta activa → resuelta
+            const pregActivaEl = document.getElementById('preguntaActiva');
+            if (pregActivaEl) {
+                const numAnterior = numPreguntaActual;
+                const textoPregAnterior = document.getElementById('textoPreguntaActual').textContent;
+                pregActivaEl.style.background = '';
+                pregActivaEl.id = '';
+                pregActivaEl.innerHTML = `
+                    <div style="font-size:11px; color:var(--primary); font-weight:600; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">🤖 Pregunta ${numAnterior}</div>
+                    <div style="font-size:14px; color:#f4f4f5; font-weight:500; margin-bottom:12px; line-height:1.6;">${escH(textoPregAnterior)}</div>
+                    <div style="background:#121212; border:1px solid #27272a; border-radius:7px; padding:10px 14px;">
+                        <div style="font-size:11px; color:#71717a; margin-bottom:4px;">Tu respuesta:</div>
+                        <div style="font-size:13px; color:#a1a1aa; line-height:1.6;">${escH(respuesta)}</div>
+                    </div>
+                `;
+            }
+
+            // Agregar nueva pregunta activa
+            numPreguntaActual = data.numPregunta;
+            const historialEl = document.getElementById('chatHistorial');
+            const nuevaPregunta = document.createElement('div');
+            nuevaPregunta.className = 'card msg-slide-in';
+            nuevaPregunta.id = 'preguntaActiva';
+            nuevaPregunta.style.cssText = 'border-left:3px solid var(--primary); padding:18px 20px; background:rgba(99,102,241,0.06);';
+            nuevaPregunta.innerHTML = `
+                <div style="font-size:11px; color:var(--primary); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">🤖 Pregunta ${numPreguntaActual} — Ahora</div>
+                <div style="font-size:15px; color:#ffffff; font-weight:600; line-height:1.7;" id="textoPreguntaActual">${escH(data.siguientePregunta)}</div>
+            `;
+            historialEl.appendChild(nuevaPregunta);
+
+            // Actualizar progreso
+            const porc = Math.round((numPreguntaActual / totalPreguntas) * 100);
+            document.getElementById('progresoFill').style.width = porc + '%';
+            document.getElementById('progresoNum').textContent = numPreguntaActual + ' / ' + totalPreguntas;
+
+            // Reset
+            textarea.value = '';
+            textarea.disabled = false;
+            btn.disabled = false;
+            btn.textContent = 'Enviar Respuesta →';
+            thinking.style.display = 'none';
+
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+        } catch (err) {
+            showToast('Error de conexión. Inténtalo de nuevo.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Enviar Respuesta →';
+            thinking.style.display = 'none';
+            textarea.disabled = false;
+        }
+    }
+
+    function escH(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    document.getElementById('respuestaTextarea').addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') enviarRespuesta();
+    });
+</script>
+</body>
+</html>
