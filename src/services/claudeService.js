@@ -209,20 +209,13 @@ Responde ÚNICAMENTE con un JSON válido, sin texto adicional, sin markdown, con
 No inventes información que no esté en el CV. Si el CV es muy corto o ambiguo, indícalo en "recomendaciones". Si el puesto no parece ser de TI, indícalo en "area_detectada" como "No es un puesto de TI" and responde el resto de los campos de forma general.`;
 
     try {
-        let respuesta;
-        let usandoGemini = false;
-
-        if (CLAUDE_API_KEY && CLAUDE_API_KEY.trim() !== '' && !CLAUDE_API_KEY.includes('tu_api_key')) {
-            respuesta = await llamarClaude(prompt);
-        } else {
-            const { llamarGemini } = require('./geminiService');
-            console.log("CLAUDE_API_KEY no detectada. Usando Gemini como alternativa para análisis de CV.");
-            respuesta = await llamarGemini(prompt);
-            usandoGemini = true;
+        if (!CLAUDE_API_KEY || CLAUDE_API_KEY.trim() === '' || CLAUDE_API_KEY.includes('tu_api_key')) {
+            throw new Error('API Key de Claude no configurada. Por favor define CLAUDE_API_KEY en las variables de entorno de tu servidor de despliegue para poder realizar el análisis de CV.');
         }
 
+        const respuesta = await llamarClaude(prompt);
         const parsed = limpiarYParsearJSON(respuesta);
-        parsed.usandoFallbackGemini = usandoGemini;
+        parsed.usandoFallbackGemini = false;
         return parsed;
     } catch (err) {
         console.error("Error al analizar CV con IA:", err);
