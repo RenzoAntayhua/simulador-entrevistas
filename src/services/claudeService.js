@@ -5,8 +5,10 @@ const CLAUDE_API_URL = process.env.CLAUDE_API_URL || process.env.ANTHROPIC_API_U
 const CLAUDE_MODEL_ENV = process.env.CLAUDE_MODEL || process.env.ANTHROPIC_MODEL;
 
 const MODELOS_CLAUDE = CLAUDE_MODEL_ENV ? [CLAUDE_MODEL_ENV] : [
-    'claude-sonnet-4-6',
-    'claude-haiku-4-5-20251001'
+    'claude-3-5-sonnet-latest',
+    'claude-3-5-haiku-latest',
+    'claude-3-5-sonnet-20241022',
+    'claude-3-5-haiku-20241022'
 ];
 
 /**

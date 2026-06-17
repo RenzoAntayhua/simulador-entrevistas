@@ -18,7 +18,7 @@ async function llamarGemini(prompt) {
 
     for (const modelo of MODELOS) {
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${API_KEY}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
             const body = {
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
@@ -28,9 +28,14 @@ async function llamarGemini(prompt) {
                 }
             };
 
+            const headers = { 'Content-Type': 'application/json' };
+            if (API_KEY) {
+                headers['x-goog-api-key'] = API_KEY;
+            }
+
             const res = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify(body)
             });
 
