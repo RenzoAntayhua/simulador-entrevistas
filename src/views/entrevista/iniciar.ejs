@@ -43,17 +43,18 @@
                         placeholder="Ej: Backend Developer Node.js, Frontend React, DevOps AWS..."
                         required
                         autocomplete="off"
+                        value="<%= typeof puesto !== 'undefined' ? puesto : '' %>"
                     >
                 </div>
 
                 <div class="form-group">
                     <label>Nivel de experiencia</label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 4px;">
-                        <button type="button" class="nivel-opt active" onclick="setNivel('Junior', this)">🌱 Junior</button>
-                        <button type="button" class="nivel-opt" onclick="setNivel('Mid', this)">⚡ Mid</button>
-                        <button type="button" class="nivel-opt" onclick="setNivel('Senior', this)">🔥 Senior</button>
+                        <button type="button" class="nivel-opt <%= (typeof nivel !== 'undefined' && nivel === 'Junior') || typeof nivel === 'undefined' ? 'active' : '' %>" onclick="setNivel('Junior', this)">🌱 Junior</button>
+                        <button type="button" class="nivel-opt <%= typeof nivel !== 'undefined' && nivel === 'Mid' ? 'active' : '' %>" onclick="setNivel('Mid', this)">⚡ Mid</button>
+                        <button type="button" class="nivel-opt <%= typeof nivel !== 'undefined' && nivel === 'Senior' ? 'active' : '' %>" onclick="setNivel('Senior', this)">🔥 Senior</button>
                     </div>
-                    <input type="hidden" name="nivel" id="nivelInput" value="Junior">
+                    <input type="hidden" name="nivel" id="nivelInput" value="<%= typeof nivel !== 'undefined' ? nivel : 'Junior' %>">
                 </div>
 
                 <button type="submit" class="btn" id="btnIniciar" style="width: 100%; padding: 11px; font-size: 14px; margin-top: 8px;">

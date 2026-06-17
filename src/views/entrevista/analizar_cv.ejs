@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador de CV con IA</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .cv-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media(min-width: 992px) {
+            .cv-grid {
+                grid-template-columns: 1fr 1.2fr;
+            }
+        }
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .tag-skill {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 500;
+        }
+        .tag-missing {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 500;
+        }
+        .tag-topic {
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge-premium {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .badge-area {
+            background: rgba(124, 58, 237, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+        }
+        .badge-level {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .metodo-opt {
+            background: #0f0f0f;
+            border: 1px solid #27272a;
+            color: #a1a1aa;
+            border-radius: 7px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: 'Inter', sans-serif;
+        }
+        .metodo-opt:hover {
+            border-color: #10b981;
+            color: #f1f1f1;
+            background: rgba(16,185,129,0.08);
+        }
+        .metodo-opt.active {
+            border-color: #10b981;
+            background: rgba(16,185,129,0.15);
+            color: #34d399;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body style="margin:0;">
+<%- include('../partials/header') %>
+
+<main class="main-content">
+    <!-- Encabezado de módulo -->
+    <div class="module-header">
+        <div class="module-header__icon module-header__icon--violet">📄</div>
+        <div>
+            <div class="module-header__title">Analizador de CV con Claude IA</div>
+            <div class="module-header__sub">Optimiza tu perfil técnico según el puesto al que postulas</div>
+        </div>
+    </div>
+
+    <% if (error) { %>
+    <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 12px 16px; color: #f87171; margin-bottom: 20px; font-size: 14px;">
+        ⚠️ <%= error %>
+    </div>
+    <% } %>
+
+    <div class="cv-grid">
+        <!-- Formulario de Entrada -->
+        <div class="card" style="padding: 28px;">
+            <h2 style="margin-bottom: 4px; font-size: 16px; font-weight: 600;">Ingresa tu Perfil</h2>
+            <p style="margin-bottom: 24px; font-size: 13px; color: var(--text-muted);">Elige cómo ingresar tu CV y el puesto al que deseas aplicar.</p>
+
+            <form action="/entrevista/analizar-cv" method="POST" id="formAnalizar">
+                <div class="form-group">
+                    <label for="inputPuesto">Puesto de Interés</label>
+                    <input
+                        type="text"
+                        name="puesto"
+                        id="inputPuesto"
+                        placeholder="Ej: Backend Developer, Data Scientist, Analista de Ciberseguridad..."
+                        required
+                        value="<%= puesto || '' %>"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label>Método de CV</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; margin-bottom: 12px;">
+                        <button type="button" class="metodo-opt active" id="btnMetodoTexto" onclick="switchMetodo('texto')">✍️ Texto Plano</button>
+                        <button type="button" class="metodo-opt" id="btnMetodoPDF" onclick="switchMetodo('pdf')">📄 Archivo PDF</button>
+                    </div>
+                </div>
+
+                <!-- Campo para Texto Plano -->
+                <div class="form-group" id="containerTexto">
+                    <label for="textoCV">Contenido de tu CV (Texto plano)</label>
+                    <textarea
+                        name="textoCV"
+                        id="textoCV"
+                        rows="12"
+                        placeholder="Pega la información de tu CV aquí (Experiencia, educación, tecnologías, etc.)..."
+                        style="width: 100%; background: #0f0f0f; border: 1px solid #27272a; border-radius: 8px; padding: 12px; color: #f4f4f5; font-family: inherit; font-size: 13px; resize: vertical;"
+                    ><%= textoCV || '' %></textarea>
+                </div>
+
+                <!-- Campo para Archivo PDF -->
+                <div class="form-group" id="containerPDF" style="display: none;">
+                    <label for="filePDF">Subir archivo PDF del CV</label>
+                    <input
+                        type="file"
+                        id="filePDF"
+                        accept=".pdf"
+                        style="width: 100%; background: #0f0f0f; border: 1px dashed #27272a; border-radius: 8px; padding: 20px; color: #f4f4f5; text-align: center; cursor: pointer;"
+                    >
+                    <div id="pdfStatus" style="font-size: 12px; margin-top: 8px; font-weight: 500; color: #a1a1aa;"></div>
+                </div>
+
+                <button type="submit" class="btn" id="btnAnalizar" style="width: 100%; padding: 11px; font-size: 14px; margin-top: 20px;">
+                    🔍 Analizar CV con Claude
+                </button>
+            </form>
+        </div>
+
+        <!-- Resultados del Análisis -->
+        <div>
+            <% if (resultado) { %>
+                <div class="card" style="padding: 28px; display: flex; flex-direction: column; gap: 20px;">
+                    <h2 style="margin: 0; font-size: 18px; font-weight: 600; color: #ffffff;">Resultados del Análisis</h2>
+                    
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <div>
+                            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">ÁREA DE TI</span>
+                            <span class="badge-premium badge-area"><%= resultado.area_detectada %></span>
+                        </div>
+                        <div>
+                            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">NIVEL ESTIMADO</span>
+                            <span class="badge-premium badge-level"><%= resultado.nivel_estimado %></span>
+                        </div>
+                    </div>
+
+                    <% if (resultado.usandoFallbackGemini) { %>
+                        <div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 6px; padding: 10px 14px; color: #fbbf24; font-size: 12px; line-height: 1.5; margin-top: 5px;">
+                            💡 <strong>Aviso de Alternativa:</strong> Al no detectarse la clave de Claude (<code>CLAUDE_API_KEY</code>) en tu archivo <code>.env</code>, este análisis se ha realizado automáticamente utilizando tu motor de <strong>Gemini</strong>.
+                        </div>
+                    <% } %>
+
+                    <hr style="border: 0; border-top: 1px solid #27272a; margin: 5px 0;">
+
+                    <!-- Fortalezas -->
+                    <div>
+                        <h3 style="margin: 0 0 6px 0; font-size: 13.5px; font-weight: 600; color: #10b981; display: flex; align-items: center; gap: 6px;">
+                            <span>🏆</span> Fortalezas principales
+                        </h3>
+                        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #e4e4e7;"><%= resultado.fortalezas %></p>
+                    </div>
+
+                    <!-- Recomendaciones -->
+                    <div>
+                        <h3 style="margin: 0 0 6px 0; font-size: 13.5px; font-weight: 600; color: #3b82f6; display: flex; align-items: center; gap: 6px;">
+                            <span>💡</span> Recomendación del Reclutador
+                        </h3>
+                        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #e4e4e7;"><%= resultado.recomendaciones %></p>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid #27272a; margin: 5px 0;">
+
+                    <!-- Skills Detectadas -->
+                    <div>
+                        <h3 style="margin: 0 0 4px 0; font-size: 13px; font-weight: 600; color: #f4f4f5;">Habilidades / Tecnologías Identificadas</h3>
+                        <% if (resultado.skills_detectadas && resultado.skills_detectadas.length > 0) { %>
+                            <div class="tag-container">
+                                <% resultado.skills_detectadas.forEach(skill => { %>
+                                    <span class="tag-skill"><%= skill %></span>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted);">Ninguna habilidad destacada en el CV.</p>
+                        <% } %>
+                    </div>
+
+                    <!-- Skills Faltantes -->
+                    <div>
+                        <h3 style="margin: 0 0 4px 0; font-size: 13px; font-weight: 600; color: #f4f4f5;">Habilidades Faltantes (Sugeridas para el puesto)</h3>
+                        <% if (resultado.skills_faltantes && resultado.skills_faltantes.length > 0) { %>
+                            <div class="tag-container">
+                                <% resultado.skills_faltantes.forEach(skill => { %>
+                                    <span class="tag-missing"><%= skill %></span>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted);">¡Tu CV cubre las tecnologías principales sugeridas!</p>
+                        <% } %>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid #27272a; margin: 5px 0;">
+
+                    <!-- Temas a Practicar -->
+                    <div>
+                        <h3 style="margin: 0 0 10px 0; font-size: 13.5px; font-weight: 600; color: #818cf8; display: flex; align-items: center; gap: 6px;">
+                            <span>✍️</span> Temas recomendados para practicar
+                        </h3>
+                        <% if (resultado.temas_practicar && resultado.temas_practicar.length > 0) { %>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <% resultado.temas_practicar.forEach(tema => { %>
+                                    <div class="tag-topic">
+                                        <span style="font-size: 12px;">🔹</span>
+                                        <span><%= tema %></span>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <!-- Botón de Acción -->
+                    <div style="margin-top: 10px;">
+                        <% 
+                           let puestoSeguro = puesto || '';
+                           if (puestoSeguro.length > 80) {
+                               puestoSeguro = puestoSeguro.substring(0, 80).trim() + '...';
+                           }
+                        %>
+                        <a href="/entrevista/iniciar?puesto=<%= encodeURIComponent(puestoSeguro) %>&nivel=<%= encodeURIComponent(resultado.nivel_estimado) %>" class="btn" style="display: block; text-align: center; text-decoration: none; padding: 11px; font-size: 13px; background: var(--primary);">
+                            🤖 Iniciar Simulacro de Entrevista para este Puesto
+                        </a>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="card" style="padding: 40px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; border: 1px dashed #27272a; background: transparent;">
+                    <div style="font-size: 40px; margin-bottom: 16px; opacity: 0.5;">📄</div>
+                    <h3 style="margin: 0 0 8px 0; font-size: 15px; font-weight: 600; color: #f4f4f5;">Esperando Entrada</h3>
+                    <p style="margin: 0; font-size: 12.5px; color: var(--text-muted); max-width: 320px; line-height: 1.5;">Ingresa el puesto y proporciona tu CV a la izquierda para iniciar el análisis interactivo.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</main>
+
+<!-- PDFJS Library para procesar PDF localmente en el navegador -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script>
+    // Configurar worker CDN para PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+    let metodoActivo = 'texto';
+    let pdfCargadoExito = false;
+
+    function switchMetodo(metodo) {
+        metodoActivo = metodo;
+        document.getElementById('btnMetodoTexto').classList.toggle('active', metodo === 'texto');
+        document.getElementById('btnMetodoPDF').classList.toggle('active', metodo === 'pdf');
+
+        if (metodo === 'texto') {
+            document.getElementById('containerTexto').style.display = 'block';
+            document.getElementById('containerPDF').style.display = 'none';
+        } else {
+            document.getElementById('containerTexto').style.display = 'none';
+            document.getElementById('containerPDF').style.display = 'block';
+        }
+    }
+
+    // Escuchar el evento de cambio del archivo PDF
+    document.getElementById('filePDF').addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const statusDiv = document.getElementById('pdfStatus');
+        statusDiv.style.color = '#fbbf24';
+        statusDiv.innerHTML = '⏳ Extrayendo texto del archivo PDF...';
+        pdfCargadoExito = false;
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = '';
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                fullText += pageText + '\n\n';
+            }
+
+            if (!fullText.trim()) {
+                throw new Error('No se encontró contenido de texto en el PDF. Puede ser una imagen.');
+            }
+
+            // Asignar el texto extraído al textarea oculto
+            document.getElementById('textoCV').value = fullText.trim();
+            statusDiv.style.color = '#10b981';
+            statusDiv.innerHTML = `✅ CV cargado: ${pdf.numPages} página(s) y ${fullText.length} caracteres leídos con éxito.`;
+            pdfCargadoExito = true;
+        } catch (err) {
+            console.error('Error parsing PDF:', err);
+            statusDiv.style.color = '#ef4444';
+            statusDiv.innerHTML = `❌ Error: ${err.message || 'No se pudo leer el archivo. Intenta copiar el texto manualmente.'}`;
+        }
+    });
+
+    document.getElementById('formAnalizar').addEventListener('submit', function(e) {
+        const puesto = document.getElementById('inputPuesto').value.trim();
+        const texto = document.getElementById('textoCV').value.trim();
+
+        if (metodoActivo === 'pdf' && !pdfCargadoExito) {
+            e.preventDefault();
+            alert('Por favor, selecciona un archivo PDF válido y espera a que termine de cargarse.');
+            return;
+        }
+
+        if (!puesto || !texto) {
+            e.preventDefault();
+            alert('Por favor completa todos los campos.');
+            return;
+        }
+
+        const btn = document.getElementById('btnAnalizar');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Claude analizando perfil...';
+    });
+</script>
+</body>
+</html>

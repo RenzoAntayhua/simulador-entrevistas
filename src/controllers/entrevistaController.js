@@ -1,11 +1,17 @@
 const db = require('../config/db');
 const { generarPregunta, generarReporte } = require('../services/geminiService');
+const { analizarCV } = require('../services/claudeService');
 
 const TOTAL_PREGUNTAS = 5;
 
 // GET /entrevista/iniciar
 exports.getIniciar = (req, res) => {
-    res.render('entrevista/iniciar');
+    const { puesto, nivel } = req.query;
+    res.render('entrevista/iniciar', {
+        puesto: puesto || '',
+        nivel: nivel || 'Junior',
+        error: null
+    });
 };
 
 // POST /entrevista/iniciar
@@ -37,9 +43,64 @@ exports.postIniciar = async (req, res) => {
         res.redirect('/entrevista/' + sesionId);
     } catch (err) {
         console.error('Error al iniciar entrevista:', err);
-        res.render('entrevista/iniciar', { error: 'Ocurrió un error al iniciar la entrevista. Inténtalo de nuevo.' });
+        res.render('entrevista/iniciar', { error: 'Ocurrió un error al iniciar la entrevista. Inténtalo de nuevo.', puesto: '', nivel: 'Junior' });
     }
 };
+
+// GET /entrevista/analizar-cv
+exports.getAnalizarCV = (req, res) => {
+    res.render('entrevista/analizar_cv', { 
+        resultado: null, 
+        error: null, 
+        puesto: '', 
+        textoCV: '',
+        currentPath: '/entrevista/analizar-cv',
+        userName: req.session.userName,
+        userId: req.session.userId
+    });
+};
+
+// POST /entrevista/analizar-cv
+exports.postAnalizarCV = async (req, res) => {
+    const { puesto, textoCV } = req.body;
+
+    if (!puesto || puesto.trim() === '' || !textoCV || textoCV.trim() === '') {
+        return res.render('entrevista/analizar_cv', {
+            resultado: null,
+            error: 'Por favor completa todos los campos.',
+            puesto: puesto || '',
+            textoCV: textoCV || '',
+            currentPath: '/entrevista/analizar-cv',
+            userName: req.session.userName,
+            userId: req.session.userId
+        });
+    }
+
+    try {
+        const resultado = await analizarCV(puesto.trim(), textoCV.trim());
+        res.render('entrevista/analizar_cv', {
+            resultado,
+            error: null,
+            puesto: puesto.trim(),
+            textoCV: textoCV.trim(),
+            currentPath: '/entrevista/analizar-cv',
+            userName: req.session.userName,
+            userId: req.session.userId
+        });
+    } catch (err) {
+        console.error('Error al analizar CV:', err);
+        res.render('entrevista/analizar_cv', {
+            resultado: null,
+            error: err.message || 'Error de conexión con la IA de Claude. Asegúrate de configurar CLAUDE_API_KEY en tu archivo .env.',
+            puesto,
+            textoCV,
+            currentPath: '/entrevista/analizar-cv',
+            userName: req.session.userName,
+            userId: req.session.userId
+        });
+    }
+};
+
 
 // GET /entrevista/:id
 exports.getSala = async (req, res) => {

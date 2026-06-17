@@ -1,88 +1,23 @@
 require('dotenv').config();
 
-// Modelos a intentar en orden si uno falla por cuota
-const MODELOS = [
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro'
+const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY || process.env.ANTHROPIC_API_KEY;
+const CLAUDE_API_URL = process.env.CLAUDE_API_URL || process.env.ANTHROPIC_API_URL || 'https://api.anthropic.com/v1/messages';
+const CLAUDE_MODEL_ENV = process.env.CLAUDE_MODEL || process.env.ANTHROPIC_MODEL;
+
+const MODELOS_CLAUDE = CLAUDE_MODEL_ENV ? [CLAUDE_MODEL_ENV] : [
+    'claude-sonnet-4-6',
+    'claude-haiku-4-5-20251001'
 ];
-
-const API_KEY = process.env.GEMINI_API_KEY;
-
-/**
- * Llama a la Gemini API con un prompt dado.
- * Intenta varios modelos si el primero falla.
- */
-async function llamarGemini(prompt) {
-    let ultimoError = '';
-
-    for (const modelo of MODELOS) {
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${API_KEY}`;
-            const body = {
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 2048,
-                    responseMimeType: 'application/json'
-                }
-            };
-
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                ultimoError = `${modelo}: ${res.status} - ${JSON.stringify(data)}`;
-                if (res.status === 400 || res.status === 403 || res.status === 401) {
-                    throw new Error(ultimoError);
-                }
-                if (res.status === 429 || res.status === 503) {
-                    await new Promise(r => setTimeout(r, 2000));
-                    continue;
-                }
-                throw new Error(ultimoError);
-            }
-
-            let texto = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!texto) throw new Error('Respuesta vacía de Gemini');
-
-            // Limpiar posibles bloques markdown
-            texto = texto.trim()
-                .replace(/^```json\s*/i, '')
-                .replace(/^```\s*/i, '')
-                .replace(/\s*```$/i, '')
-                .trim();
-
-            return texto;
-        } catch (err) {
-            console.error(`Intento con Gemini (${modelo}) falló:`, err.message);
-            ultimoError = err.message;
-            if (err.message.includes('400') || err.message.includes('403') || err.message.includes('API_KEY_INVALID') || err.message.includes('401')) {
-                throw err;
-            }
-            await new Promise(r => setTimeout(r, 1500));
-        }
-    }
-
-    throw new Error(`Todos los modelos de Gemini fallaron. Último error: ${ultimoError}`);
-}
 
 /**
  * Limpia y repara respuestas de texto JSON inválidas que suelen venir de modelos LLM.
- * Escapa comillas internas y corrige saltos de línea reales dentro de valores.
  */
 function limpiarYParsearJSON(texto) {
     if (!texto) throw new Error('Respuesta vacía');
 
-    // Encontrar el bloque JSON
     let jsonStart = texto.indexOf('{');
     let jsonEnd = texto.lastIndexOf('}');
-    
+
     if (jsonStart === -1 || jsonEnd === -1) {
         jsonStart = texto.indexOf('[');
         jsonEnd = texto.lastIndexOf(']');
@@ -94,39 +29,38 @@ function limpiarYParsearJSON(texto) {
 
     const jsonStr = texto.substring(jsonStart, jsonEnd + 1);
 
-    // Helper para mirar adelante y ver si la comilla es un delimitador de JSON real
     function lookAheadForClosingQuote(str, index) {
         let i = index + 1;
         while (i < str.length && /\s/.test(str[i])) {
             i++;
         }
-        if (i >= str.length) return true; // Fin del JSON
-        
+        if (i >= str.length) return true;
+
         const char = str[i];
         if (char === '}' || char === ']' || char === ':') {
             return true;
         }
-        
+
         if (char === ',') {
             i++;
             while (i < str.length && /\s/.test(str[i])) {
                 i++;
             }
             if (i >= str.length) return true;
-            
+
             const nextChar = str[i];
             if (nextChar === '"' || nextChar === '{' || nextChar === '[' || nextChar === '-' || (nextChar >= '0' && nextChar <= '9')) {
                 return true;
             }
-            
+
             const rest = str.substring(i);
             if (rest.startsWith('true') || rest.startsWith('false') || rest.startsWith('null')) {
                 return true;
             }
-            
+
             return false;
         }
-        
+
         return false;
     }
 
@@ -169,24 +103,133 @@ function limpiarYParsearJSON(texto) {
         }
     }
 
-    // Eliminar comas huérfanas antes de llaves/corchetes de cierre
     let limpio = resultado.replace(/,\s*([}\]])/g, '$1');
 
     try {
         return JSON.parse(limpio);
     } catch (err) {
-        console.error("Error al parsear JSON limpio:", err.message);
+        console.error("Error al parsear JSON limpio de Claude:", err.message);
         console.error("JSON procesado:", limpio);
         throw err;
     }
 }
 
 /**
- * Genera la siguiente pregunta de entrevista adaptada al historial.
- * @param {string} puesto - El puesto al que postula el candidato
- * @param {string} nivel - Junior / Mid / Senior
- * @param {Array} historial - Array de {pregunta, respuesta}
- * @returns {Promise<string>} La siguiente pregunta
+ * Llama a la API de Anthropic Messages.
+ */
+async function llamarClaude(prompt) {
+    if (!CLAUDE_API_KEY) {
+        throw new Error('API Key de Claude no configurada. Por favor define CLAUDE_API_KEY o ANTHROPIC_API_KEY en tu archivo .env');
+    }
+
+    let ultimoError = '';
+
+    for (const modelo of MODELOS_CLAUDE) {
+        try {
+            const url = CLAUDE_API_URL;
+            const body = {
+                model: modelo,
+                max_tokens: 2048,
+                messages: [
+                    { role: 'user', content: prompt }
+                ]
+            };
+
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'x-api-key': CLAUDE_API_KEY,
+                    'anthropic-version': '2023-06-01',
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                ultimoError = `${modelo}: ${res.status} - ${JSON.stringify(data)}`;
+                if (res.status === 401 || res.status === 403) {
+                    throw new Error(ultimoError);
+                }
+                if (res.status === 429 || res.status === 503) {
+                    await new Promise(r => setTimeout(r, 2000));
+                    continue;
+                }
+                throw new Error(ultimoError);
+            }
+
+            let texto = data?.content?.[0]?.text;
+            if (!texto) throw new Error('Respuesta vacía de Claude');
+
+            return texto;
+        } catch (err) {
+            console.error(`Intento con Claude (${modelo}) falló:`, err.message);
+            ultimoError = err.message;
+            if (err.message.includes('401') || err.message.includes('403') || err.message.toLowerCase().includes('credit') || err.message.toLowerCase().includes('billing')) {
+                throw err;
+            }
+            await new Promise(r => setTimeout(r, 1500));
+        }
+    }
+
+    throw new Error(`Todos los intentos con Claude fallaron. Último error: ${ultimoError}`);
+}
+
+/**
+ * Analiza un CV usando Claude basado en el puesto.
+ * @param {string} puesto
+ * @param {string} textoCV
+ * @returns {Promise<Object>} Resultado formateado del análisis
+ */
+async function analizarCV(puesto, textoCV) {
+    const prompt = `Eres un reclutador técnico experto en análisis de CVs para CUALQUIER área de Tecnologías de la Información (Desarrollo de Software, Data Science, Ciberseguridad, DevOps, Redes, QA, UX/UI, Soporte Técnico, etc.)
+
+Analiza el siguiente CV para el puesto de "${puesto}".
+
+CV:
+${textoCV}
+
+Primero identifica a qué área de TI pertenece el puesto, y luego evalúa el CV con criterios específicos de esa área (por ejemplo, si es Ciberseguridad evalúa certificaciones y herramientas de seguridad; si es Data Science evalúa estadística y manejo de datos; si es Desarrollo evalúa lenguajes y frameworks).
+
+Responde ÚNICAMENTE con un JSON válido, sin texto adicional, sin markdown, con esta estructura exacta:
+
+{
+  "area_detectada": "área de TI a la que pertenece el puesto (ej: Desarrollo Backend, Ciberseguridad, Data Science, DevOps, Redes, QA, UX/UI)",
+  "skills_detectadas": ["lista de tecnologías y habilidades que tiene el candidato, relevantes para esa área"],
+  "skills_faltantes": ["lista de tecnologías o conocimientos importantes para el puesto que NO tiene"],
+  "nivel_estimado": "Junior" | "Mid" | "Senior",
+  "fortalezas": "resumen breve de 2 líneas de lo más fuerte del candidato",
+  "recomendaciones": "consejo breve de 2-3 líneas para mejorar su perfil, específico al área detectada",
+  "temas_practicar": ["lista de 3 a 5 temas que debería reforzar, propios del área detectada"]
+}
+
+No inventes información que no esté en el CV. Si el CV es muy corto o ambiguo, indícalo en "recomendaciones". Si el puesto no parece ser de TI, indícalo en "area_detectada" como "No es un puesto de TI" and responde el resto de los campos de forma general.`;
+
+    try {
+        let respuesta;
+        let usandoGemini = false;
+
+        if (CLAUDE_API_KEY && CLAUDE_API_KEY.trim() !== '' && !CLAUDE_API_KEY.includes('tu_api_key')) {
+            respuesta = await llamarClaude(prompt);
+        } else {
+            const { llamarGemini } = require('./geminiService');
+            console.log("CLAUDE_API_KEY no detectada. Usando Gemini como alternativa para análisis de CV.");
+            respuesta = await llamarGemini(prompt);
+            usandoGemini = true;
+        }
+
+        const parsed = limpiarYParsearJSON(respuesta);
+        parsed.usandoFallbackGemini = usandoGemini;
+        return parsed;
+    } catch (err) {
+        console.error("Error al analizar CV con IA:", err);
+        throw err;
+    }
+}
+
+/**
+ * Genera la siguiente pregunta de entrevista usando Claude con fallback a Gemini.
  */
 async function generarPregunta(puesto, nivel, historial) {
     const historialTexto = historial.map((h, i) =>
@@ -195,7 +238,6 @@ async function generarPregunta(puesto, nivel, historial) {
 
     const numPregunta = historial.length + 1;
 
-    // Detectar si la última respuesta fue un "no sé"
     const ultimaRespuesta = historial.length > 0 ? (historial[historial.length - 1].respuesta || '').toLowerCase().trim() : '';
     const esNoSe = /^(no s[eé]|no tengo idea|no recuerdo|no me acuerdo|desconozco|no lo s[eé]|ni idea|paso|no sé nada|no tengo conocimiento)/.test(ultimaRespuesta) || ultimaRespuesta.length < 10;
 
@@ -224,34 +266,24 @@ Responde ÚNICAMENTE con un JSON con este formato exacto:
 IMPORTANTE: No incluyas saltos de línea reales dentro de la pregunta. Si necesitas un salto de línea, escápalo como \\n. No uses comillas dobles sin escapar dentro de la pregunta.`;
 
     try {
-        const respuesta = await llamarGemini(prompt);
+        const respuesta = await llamarClaude(prompt);
         const parsed = limpiarYParsearJSON(respuesta);
         return parsed.pregunta || `Cuéntame sobre tus experiencias previas trabajando con ${puesto} y qué retos has tenido.`;
     } catch (err) {
-        console.error("Error al generar pregunta con Gemini:", err);
-        const defaultQuestions = [
-            `¿Cuáles consideras que son las mejores prácticas al desarrollar con ${puesto}?`,
-            `¿Cómo manejas el control de versiones y el trabajo en equipo en un proyecto de ${puesto}?`,
-            `Describe un problema técnico difícil que hayas resuelto recientemente en ${puesto}.`,
-            `¿Qué herramientas o librerías consideras esenciales para trabajar con ${puesto} y por qué?`
-        ];
-        return defaultQuestions[Math.min(historial.length, defaultQuestions.length - 1)];
+        console.error("Error al generar pregunta con Claude, intentando fallback a Gemini:", err);
+        const { generarPregunta: generarPreguntaGemini } = require('./geminiService');
+        return generarPreguntaGemini(puesto, nivel, historial);
     }
 }
 
 /**
- * Genera el reporte final de la entrevista.
- * @param {string} puesto
- * @param {string} nivel
- * @param {Array} historial - Array de {pregunta, respuesta}
- * @returns {Promise<Object>} Reporte completo en JSON
+ * Genera el reporte final de la entrevista usando Claude con fallback a Gemini.
  */
 async function generarReporte(puesto, nivel, historial) {
     const historialTexto = historial.map((h, i) =>
         `Pregunta ${i + 1}: ${h.pregunta}\nRespuesta del candidato: ${h.respuesta}`
     ).join('\n\n');
 
-    // Detectar respuestas "no sé" para mencionarlas explícitamente en el prompt
     const temasNoSabe = historial
         .filter(h => {
             const r = (h.respuesta || '').toLowerCase().trim();
@@ -301,37 +333,13 @@ Responde ÚNICAMENTE con un JSON válido con este formato exacto (sin texto adic
 IMPORTANTE: Si usas comillas dobles (") dentro de cualquier texto en el JSON (por ejemplo, en resumen, comentarios o debilidades), DEBES escaparlas como \\\" o usar comillas simples ('). No incluyas saltos de línea reales dentro de los valores de texto del JSON; si requieres saltos de línea, escápala como \\n.`;
 
     try {
-        const respuesta = await llamarGemini(prompt);
+        const respuesta = await llamarClaude(prompt);
         return limpiarYParsearJSON(respuesta);
     } catch (err) {
-        console.error("Error al generar reporte con Gemini:", err);
-        // Calcular una nota de fallback basada en las respuestas "no sé"
-        const fallas = temasNoSabe.length;
-        const notaFallback = Math.max(5, 20 - (fallas * 3) - (Math.random() * 2));
-        const notaRedondeada = Math.round(notaFallback * 10) / 10;
-        
-        return {
-            nota: notaRedondeada,
-            nivel_alcanzado: fallas > 2 ? `${nivel} con debilidades` : `${nivel} apto`,
-            resumen: `Reporte de contingencia generado automáticamente debido a una interrupción en el análisis. El candidato completó la entrevista para ${puesto} (${nivel}) respondiendo a ${historial.length} preguntas.`,
-            fortalezas: [
-                `Completó la entrevista de ${historial.length} preguntas de manera estructurada.`,
-                `Mostró interés y perseverancia durante la evaluación.`
-            ],
-            debilidades: temasNoSabe.length > 0 ? temasNoSabe.map(t => t.replace(/Pregunta \d+: /, '')) : [
-                `Se requiere profundizar en aspectos avanzados de ${puesto}.`
-            ],
-            recomendacion: `Revisar y reforzar los conceptos evaluados durante la sesión, especialmente en las áreas con respuestas dudosas o incompletas.`,
-            evaluacion_por_area: [
-                {"area": "Conocimiento Técnico", "puntaje": Math.round(notaRedondeada * 0.8), "maximo": 20, "comentario": "Evaluado preliminarmente."},
-                {"area": "Resolución de Problemas", "puntaje": Math.round(notaRedondeada * 0.7), "maximo": 20, "comentario": "Resuelve la mayoría de retos planteados."},
-                {"area": "Comunicación", "puntaje": 15, "maximo": 20, "comentario": "Fluidez comunicativa adecuada."},
-                {"area": "Experiencia Práctica", "puntaje": Math.round(notaRedondeada * 0.75), "maximo": 20, "comentario": "Suficiente para el nivel."},
-                {"area": "Cultura y Actitud", "puntaje": 16, "maximo": 20, "comentario": "Buena disposición a la evaluación."}
-            ],
-            contrataria: notaRedondeada >= 11
-        };
+        console.error("Error al generar reporte con Claude, intentando fallback a Gemini:", err);
+        const { generarReporte: generarReporteGemini } = require('./geminiService');
+        return generarReporteGemini(puesto, nivel, historial);
     }
 }
 
-module.exports = { generarPregunta, generarReporte, llamarGemini };
+module.exports = { analizarCV, generarPregunta, generarReporte };

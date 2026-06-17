@@ -32,7 +32,8 @@
         <a href="/usuarios" class="btn-crear <%= currentPath && currentPath.startsWith('/usuarios') ? 'active' : '' %>">Usuarios</a>
         <a href="/amigos" class="btn-crear <%= currentPath && currentPath.startsWith('/amigos') ? 'active' : '' %>">Amigos</a>
         <a href="/certificados" class="btn-crear <%= currentPath && currentPath.startsWith('/certificados') ? 'active' : '' %>">Certificados</a>
-        <a href="/entrevista" class="btn-crear <%= currentPath && currentPath.startsWith('/entrevista') ? 'active' : '' %>" style="border-left: 3px solid #6366f1;">🤖 Entrevistador IA</a>
+        <a href="/entrevista" class="btn-crear <%= currentPath && currentPath.startsWith('/entrevista') && currentPath !== '/entrevista/analizar-cv' ? 'active' : '' %>" style="border-left: 3px solid #6366f1;">🤖 Entrevistador IA</a>
+        <a href="/entrevista/analizar-cv" class="btn-crear <%= currentPath === '/entrevista/analizar-cv' ? 'active' : '' %>" style="border-left: 3px solid #10b981;">📄 Analizar CV</a>
         <a href="#" onclick="openModal('tpl-crear-banco'); return false;" class="btn-crear">+ Crear Banco</a>
         <a href="#" onclick="openModal('tpl-crear-reto'); return false;" class="btn-crear">Crear Reto</a>
 
