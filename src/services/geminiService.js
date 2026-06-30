@@ -16,11 +16,11 @@ async function llamarGemini(prompt) {
     if (!apiKey || apiKey.trim() === '' || apiKey === 'undefined' || apiKey.includes('tu_api_key')) {
         throw new Error('API Key de Gemini no configurada. Por favor define GEMINI_API_KEY en tu archivo .env o en las variables de entorno del servidor de despliegue.');
     }
-    let ultimoError = '';
+    const errores = [];
 
     for (const modelo of MODELOS) {
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${apiKey}`;
             const body = {
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
@@ -30,29 +30,20 @@ async function llamarGemini(prompt) {
                 }
             };
 
-            const headers = { 'Content-Type': 'application/json' };
-            if (apiKey) {
-                headers['x-goog-api-key'] = apiKey;
-            }
-
             const res = await fetch(url, {
                 method: 'POST',
-                headers,
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
 
             const data = await res.json();
 
             if (!res.ok) {
-                ultimoError = `${modelo}: ${res.status} - ${JSON.stringify(data)}`;
-                if (res.status === 400 || res.status === 403 || res.status === 401) {
-                    throw new Error(ultimoError);
-                }
-                if (res.status === 429 || res.status === 503) {
-                    await new Promise(r => setTimeout(r, 2000));
-                    continue;
-                }
-                throw new Error(ultimoError);
+                const errMsg = data.error?.message || JSON.stringify(data);
+                const modelError = `${modelo} (HTTP ${res.status}): ${errMsg}`;
+                console.error(`Intento con Gemini (${modelo}) falló:`, modelError);
+                errores.push(modelError);
+                continue;
             }
 
             let texto = data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -67,16 +58,14 @@ async function llamarGemini(prompt) {
 
             return texto;
         } catch (err) {
-            console.error(`Intento con Gemini (${modelo}) falló:`, err.message);
-            ultimoError = err.message;
-            if (err.message.includes('400') || err.message.includes('403') || err.message.includes('API_KEY_INVALID') || err.message.includes('401')) {
-                throw err;
-            }
-            await new Promise(r => setTimeout(r, 1500));
+            const catchError = `${modelo} (Error de red/petición): ${err.message}`;
+            console.error(`Excepción con Gemini (${modelo}):`, err.message);
+            errores.push(catchError);
+            await new Promise(r => setTimeout(r, 1000));
         }
     }
 
-    throw new Error(`Todos los modelos de Gemini fallaron. Último error: ${ultimoError}`);
+    throw new Error(`Todos los modelos de Gemini fallaron. Detalles: [${errores.join(' | ')}]`);
 }
 
 /**
