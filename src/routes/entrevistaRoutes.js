@@ -12,5 +12,6 @@ router.get('/:id', isAuthenticated, entrevistaController.getSala);
 router.post('/:id/responder', isAuthenticated, entrevistaController.postResponder);
 router.get('/:id/reporte', isAuthenticated, entrevistaController.getReporte);
 router.get('/:id/pdf', isAuthenticated, entrevistaController.getPDF);
+router.post('/generar-retos-mejora', isAuthenticated, entrevistaController.postGenerarRetosMejora);
 
 module.exports = router;

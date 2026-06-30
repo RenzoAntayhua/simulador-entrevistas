@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan de Mejora Personalizado</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .reto-card {
+            background: #0f0f0f;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .reto-card:hover {
+            border-color: #4f46e5;
+            transform: translateY(-2px);
+        }
+        .dificultad-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .dificultad-fácil { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .dificultad-medio { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+        .dificultad-difícil { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .lenguaje-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body style="margin:0;">
+    <%- include('../partials/header') %>
+
+    <main class="main-content">
+        <div class="module-header">
+            <div class="module-header__icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">🎯</div>
+            <div>
+                <div class="module-header__title">Tu Plan de Mejora Personalizado</div>
+                <div class="module-header__sub">Retos generados específicamente para cubrir tus debilidades en: <%= skillsFaltantes %></div>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 30px;">
+            <p style="color: #a1a1aa; margin-top: 0; margin-bottom: 25px; line-height: 1.6;">
+                La inteligencia artificial ha analizado las habilidades faltantes para el puesto de <strong><%= puesto %></strong> y ha generado estos <strong>3 retos de programación</strong> para ayudarte a practicar y dominar esos conceptos.
+            </p>
+
+            <% retos.forEach((reto, index) => { %>
+                <div class="reto-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 250px;">
+                            <h3 style="margin: 0 0 10px 0; color: #f4f4f5; font-size: 18px;"><%= index + 1 %>. <%= reto.titulo %></h3>
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                                <span class="dificultad-badge dificultad-<%= reto.dificultad ? reto.dificultad.toLowerCase() : 'medio' %>"><%= reto.dificultad || 'Medio' %></span>
+                                <span class="lenguaje-badge"><%= reto.lenguaje %></span>
+                            </div>
+                            <p style="color: #d4d4d8; font-size: 14px; margin: 0 0 16px 0; line-height: 1.5;"><%= reto.enunciado %></p>
+                        </div>
+                        <div style="text-align: right;">
+                            <a href="/retos/resolver/<%= reto.id %>" class="btn" style="background: #4f46e5; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 500; display: inline-block;">
+                                💻 Resolver Reto
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <a href="/dashboard" style="color: #a1a1aa; text-decoration: none; font-size: 14px; transition: color 0.2s;">
+                    Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

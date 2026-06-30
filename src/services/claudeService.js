@@ -335,4 +335,49 @@ IMPORTANTE: Si usas comillas dobles (") dentro de cualquier texto en el JSON (po
     }
 }
 
-module.exports = { analizarCV, generarPregunta, generarReporte };
+/**
+ * Genera retos de programación personalizados basados en habilidades faltantes.
+ */
+async function generarRetosPorHabilidades(puesto, skillsFaltantes) {
+    const prompt = `Eres un ingeniero de software senior y creador de problemas estilo LeetCode o HackerRank.
+Un candidato para el puesto de "${puesto}" necesita mejorar urgentemente en las siguientes habilidades o temas: ${skillsFaltantes}.
+
+Tu tarea es generar exactamente 3 retos (ejercicios) de programación prácticos que ayuden al candidato a aprender, practicar y dominar estas habilidades específicas.
+
+Restricciones para cada reto:
+1. El "lenguaje" sugerido debe ser "JavaScript", a menos que las habilidades faltantes requieran estrictamente "Python", "Java", "C++" o "C#".
+2. Debe incluir un "codigo_inicial" válido en ese lenguaje con la firma de una función llamada "solucion" (ej. function solucion(arg1) { ... }).
+3. Debe incluir 2 casos de prueba obligatorios. Cada caso debe tener "input" (el valor literal que se pasará, ej: '[1, 2, 3]' o '10, 5') y "output" (el valor esperado, ej: '6' o '"hola"'). 
+4. El nivel de dificultad debe ser 1 "Fácil", 1 "Medio", y 1 "Difícil" o "Medio".
+
+Responde ÚNICAMENTE con un JSON válido, sin markdown ni texto extra, con esta estructura exacta:
+
+[
+  {
+    "titulo": "Título corto del reto",
+    "enunciado": "Descripción detallada del problema y lo que se espera que haga la función.",
+    "lenguaje": "JavaScript",
+    "codigo_inicial": "function solucion(a) {\\n  // Tu código aquí\\n}",
+    "pista": "Una pista breve para resolver el problema.",
+    "dificultad": "Fácil",
+    "casos_prueba": [
+      { "input": "...", "output": "..." },
+      { "input": "...", "output": "..." }
+    ]
+  },
+  ...
+]
+
+IMPORTANTE: Si usas saltos de línea dentro de los strings (como en codigo_inicial o enunciado), asegúrate de escaparlos correctamente como \\n. No uses comillas dobles sin escapar dentro de los strings.`;
+
+    try {
+        const respuesta = await llamarClaude(prompt);
+        const parsed = limpiarYParsearJSON(respuesta);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+        console.error("Error al generar retos con Claude:", err);
+        throw new Error("No se pudieron generar los retos de mejora en este momento.");
+    }
+}
+
+module.exports = { analizarCV, generarPregunta, generarReporte, generarRetosPorHabilidades };

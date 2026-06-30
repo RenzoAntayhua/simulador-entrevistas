@@ -483,3 +483,60 @@ exports.getMisSesiones = async (req, res) => {
         res.redirect('/dashboard');
     }
 };
+
+// POST /entrevista/generar-retos-mejora
+exports.postGenerarRetosMejora = async (req, res) => {
+    const { puesto, skills_faltantes } = req.body;
+
+    if (!puesto || !skills_faltantes) {
+        return res.status(400).send("Faltan datos requeridos.");
+    }
+
+    try {
+        const { generarRetosPorHabilidades } = require('../services/claudeService');
+        const retosGenerados = await generarRetosPorHabilidades(puesto, skills_faltantes);
+
+        if (!retosGenerados || retosGenerados.length === 0) {
+            throw new Error("No se generaron retos.");
+        }
+
+        const retosIds = [];
+
+        // Insertar cada reto en la BD
+        for (const reto of retosGenerados) {
+            const [result] = await db.execute(
+                'INSERT INTO retos (titulo, enunciado, codigo_inicial, dificultad, lenguaje, pista, autor_id, puntos) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                [reto.titulo, reto.enunciado, reto.codigo_inicial || '', reto.dificultad || 'Medio', reto.lenguaje || 'JavaScript', reto.pista || null, req.session.userId, 10]
+            );
+            const retoId = result.insertId;
+            retosIds.push(retoId);
+
+            // Insertar casos de prueba
+            if (reto.casos_prueba && reto.casos_prueba.length > 0) {
+                for (const caso of reto.casos_prueba) {
+                    await db.execute(
+                        'INSERT INTO casos_prueba (reto_id, input, output_esperado, es_visible) VALUES (?, ?, ?, ?)',
+                        [retoId, caso.input, caso.output, 1]
+                    );
+                }
+            }
+        }
+
+        // Obtener los retos insertados para enviarlos a la vista
+        const placeholders = retosIds.map(() => '?').join(',');
+        const [retosBD] = await db.execute(`SELECT * FROM retos WHERE id IN (${placeholders})`, retosIds);
+
+        res.render('entrevista/plan_mejora', {
+            puesto,
+            skillsFaltantes: skills_faltantes,
+            retos: retosBD,
+            userName: req.session.userName,
+            userId: req.session.userId,
+            currentPath: '/entrevista/plan-mejora'
+        });
+    } catch (err) {
+        console.error('Error al generar retos de mejora:', err);
+        res.status(500).send("Error interno al generar los retos de mejora: " + err.message);
+    }
+};
+

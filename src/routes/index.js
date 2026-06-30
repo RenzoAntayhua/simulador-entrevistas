@@ -84,12 +84,25 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
             return found ? found.total : 0;
         });
 
+        // 4. Plan de Práctica (Retos IA pendientes)
+        const [planPractica] = await db.execute(`
+            SELECT r.*
+            FROM retos r
+            WHERE r.autor_id = ?
+              AND r.id NOT IN (
+                  SELECT reto_id FROM intentos_retos WHERE usuario_id = ? AND resultado = 'Exitoso'
+              )
+            ORDER BY r.id DESC
+            LIMIT 5
+        `, [req.session.userId, req.session.userId]);
+
         res.render('home', { 
             nombre: req.session.userName, 
             bancos: misBancos, 
             radarData, 
             activityLabels, 
-            activityData 
+            activityData,
+            planPractica
         });
     } catch (error) {
         console.error(error);
@@ -98,7 +111,8 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
             bancos: [], 
             radarData: [0, 0, 0, 0, 0, 0], 
             activityLabels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'], 
-            activityData: [0, 0, 0, 0, 0, 0, 0] 
+            activityData: [0, 0, 0, 0, 0, 0, 0],
+            planPractica: []
         });
     }
 });
