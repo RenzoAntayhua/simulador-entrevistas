@@ -5,7 +5,7 @@ const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '492667044647-ip91s35salhgo6jb
 const client = new OAuth2Client(CLIENT_ID);
 
 exports.getLogin = (req, res) => {
-    res.render('auth/login', { googleClientId: process.env.GOOGLE_CLIENT_ID || '492667044647-ip91s35salhgo6jb96h2s9ovj1gfgb4s.apps.googleusercontent.com' });
+    res.render('auth/login', { googleClientId: CLIENT_ID });
 };
 
 exports.postLogin = async (req, res) => {
@@ -70,6 +70,7 @@ exports.postGoogleLogin = async (req, res) => {
         return res.status(400).send('No credential received from Google.');
     }
     try {
+        console.log('Google Auth: Verificando token con CLIENT_ID:', CLIENT_ID);
         const ticket = await client.verifyIdToken({
             idToken: credential,
             audience: CLIENT_ID,
@@ -80,21 +81,21 @@ exports.postGoogleLogin = async (req, res) => {
         let user = await User.findByEmail(email);
         if (!user) {
             const randomPassword = bcrypt.hashSync(Math.random().toString(36), 10);
-            // Si el user no existe, asumo que al crearse será un 'user' por defecto, 
-            // aunque el método User.create podría no gestionar 'proveedor' si no lo hemos adaptado, pero asumiremos que sí funciona.
             const result = await User.create(name, email, randomPassword);
             user = { id: result.insertId, nombre: name, email, rol: 'user' };
         } else if (user.rol === 'admin') {
-            return res.status(403).send('Los administradores no pueden iniciar sesión con Google.');
+            return res.status(403).send('Los administradores no pueden iniciar sesion con Google.');
         }
         
         req.session.userId = user.id;
         req.session.userName = user.nombre;
-        req.session.usuario = user; // Guardamos el objeto completo
+        req.session.usuario = user;
         return res.redirect('/dashboard');
     } catch (error) {
-        console.error('Google Auth Error:', error);
-        return res.status(500).send('Error verificando la cuenta de Google. Revisa la consola para m%�s detalles.');
+        console.error('Google Auth Error DETALLADO:', error.message);
+        console.error('CLIENT_ID usado:', CLIENT_ID);
+        console.error('Error completo:', error);
+        return res.status(500).send('Error verificando la cuenta de Google: ' + error.message);
     }
 };
 
