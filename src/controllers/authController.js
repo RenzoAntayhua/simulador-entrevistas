@@ -1,7 +1,7 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '492667044647-ip91s35salhgo6jb96h2s9ovj1gfgb4s.apps.googleusercontent.com';
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '279698872477-rulqnl9i28p3jcgvfpfqfeucl56nglb1.apps.googleusercontent.com';
 const client = new OAuth2Client(CLIENT_ID);
 
 exports.getLogin = (req, res) => {
