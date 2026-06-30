@@ -7,14 +7,13 @@ const MODELOS = [
     'gemini-1.5-pro'
 ];
 
-const API_KEY = process.env.GEMINI_API_KEY;
-
 /**
  * Llama a la Gemini API con un prompt dado.
  * Intenta varios modelos si el primero falla.
  */
 async function llamarGemini(prompt) {
-    if (!API_KEY || API_KEY.trim() === '' || API_KEY === 'undefined' || API_KEY.includes('tu_api_key')) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey.trim() === '' || apiKey === 'undefined' || apiKey.includes('tu_api_key')) {
         throw new Error('API Key de Gemini no configurada. Por favor define GEMINI_API_KEY en tu archivo .env o en las variables de entorno del servidor de despliegue.');
     }
     let ultimoError = '';
@@ -32,8 +31,8 @@ async function llamarGemini(prompt) {
             };
 
             const headers = { 'Content-Type': 'application/json' };
-            if (API_KEY) {
-                headers['x-goog-api-key'] = API_KEY;
+            if (apiKey) {
+                headers['x-goog-api-key'] = apiKey;
             }
 
             const res = await fetch(url, {

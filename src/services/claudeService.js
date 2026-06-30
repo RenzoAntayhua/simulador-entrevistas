@@ -225,7 +225,7 @@ No inventes información que no esté en el CV. Si el CV es muy corto o ambiguo,
             return parsed;
         } catch (geminiErr) {
             console.error("Fallback a Gemini tambien fallo:", geminiErr.message);
-            throw new Error('No se pudo analizar el CV. Tanto Claude como Gemini fallaron. Verifica tus API keys.');
+            throw new Error(`No se pudo analizar el CV. Claude fallo con: "${err.message}". Gemini fallo con: "${geminiErr.message}".`);
         }
     }
 }
