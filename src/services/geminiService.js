@@ -3,7 +3,9 @@ require('dotenv').config();
 // Modelos a intentar en orden si uno falla por cuota
 const MODELOS = [
     'gemini-2.0-flash',
+    'gemini-1.5-flash-latest',
     'gemini-1.5-flash',
+    'gemini-1.5-pro-latest',
     'gemini-1.5-pro'
 ];
 
@@ -19,49 +21,69 @@ async function llamarGemini(prompt) {
     const errores = [];
 
     for (const modelo of MODELOS) {
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${apiKey}`;
-            const body = {
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 2048,
-                    responseMimeType: 'application/json'
+        let intentosRestantes = 3;
+        let exito = false;
+
+        while (intentosRestantes > 0 && !exito) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${apiKey}`;
+                const body = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        maxOutputTokens: 2048,
+                        responseMimeType: 'application/json'
+                    }
+                };
+
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    const errMsg = data.error?.message || JSON.stringify(data);
+                    
+                    // Si es un error de cuota temporal (429) o servicio no disponible (503), esperamos y reintentamos el mismo modelo
+                    if (res.status === 429 || res.status === 503 || errMsg.includes('Quota exceeded')) {
+                        intentosRestantes--;
+                        if (intentosRestantes > 0) {
+                            console.warn(`Gemini (${modelo}) limitó la tasa (HTTP ${res.status}). Reintentando en 3.5s... (Intentos restantes: ${intentosRestantes})`);
+                            await new Promise(r => setTimeout(r, 3500));
+                            continue;
+                        }
+                    }
+
+                    const modelError = `${modelo} (HTTP ${res.status}): ${errMsg}`;
+                    console.error(`Intento con Gemini (${modelo}) falló:`, modelError);
+                    errores.push(modelError);
+                    break; // Salir de los reintentos y probar el siguiente modelo
                 }
-            };
 
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
+                let texto = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!texto) throw new Error('Respuesta vacía de Gemini');
 
-            const data = await res.json();
+                // Limpiar posibles bloques markdown
+                texto = texto.trim()
+                    .replace(/^```json\s*/i, '')
+                    .replace(/^```\s*/i, '')
+                    .replace(/\s*```$/i, '')
+                    .trim();
 
-            if (!res.ok) {
-                const errMsg = data.error?.message || JSON.stringify(data);
-                const modelError = `${modelo} (HTTP ${res.status}): ${errMsg}`;
-                console.error(`Intento con Gemini (${modelo}) falló:`, modelError);
-                errores.push(modelError);
-                continue;
+                return texto;
+            } catch (err) {
+                intentosRestantes--;
+                const catchError = `${modelo} (Error de red/petición): ${err.message}`;
+                console.error(`Excepción con Gemini (${modelo}):`, err.message);
+                if (intentosRestantes <= 0) {
+                    errores.push(catchError);
+                } else {
+                    await new Promise(r => setTimeout(r, 2000));
+                }
             }
-
-            let texto = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!texto) throw new Error('Respuesta vacía de Gemini');
-
-            // Limpiar posibles bloques markdown
-            texto = texto.trim()
-                .replace(/^```json\s*/i, '')
-                .replace(/^```\s*/i, '')
-                .replace(/\s*```$/i, '')
-                .trim();
-
-            return texto;
-        } catch (err) {
-            const catchError = `${modelo} (Error de red/petición): ${err.message}`;
-            console.error(`Excepción con Gemini (${modelo}):`, err.message);
-            errores.push(catchError);
-            await new Promise(r => setTimeout(r, 1000));
         }
     }
 
