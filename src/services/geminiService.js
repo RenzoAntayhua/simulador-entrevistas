@@ -24,9 +24,11 @@ async function llamarGemini(prompt) {
         let intentosRestantes = 3;
         let exito = false;
 
+        const apiVersion = modelo.includes('2.0') ? 'v1beta' : 'v1';
+        const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelo}:generateContent?key=${apiKey}`;
+
         while (intentosRestantes > 0 && !exito) {
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${apiKey}`;
                 const body = {
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: {
