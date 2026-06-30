@@ -449,6 +449,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `foto_perfil` varchar(255) DEFAULT 'default-user.png',
+  `rol` varchar(20) DEFAULT 'user',
   `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)

@@ -99,23 +99,29 @@ io.on('connection', (socket) => {
     });
 });
 
+// 0. Header COOP para permitir popups de Google Sign-In
+app.use((req, res, next) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    next();
+});
+
 // 1. Middlewares de lectura (DEBEN IR PRIMERO)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // 2. Sesiones en MySQL (Para Producción)
 const MySQLStore = require('express-mysql-session')(session);
-const pool = require('./src/config/db').pool; // Asegúrate de que tu db.js exporta 'pool' directamente o modificar esto.
-// Nota: Si src/config/db.js exporta directamente el pool de promesas, el store de MySQL puede tomarlo o necesita sus propias credenciales.
-// La forma más segura de instanciar es pasarle las credenciales:
-const options = {
+const sessionStoreOptions = {
     host: process.env.DB_HOST || 'localhost',
-    port: 3306,
+    port: process.env.DB_PORT || 3306,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || 'root',
-    database: process.env.DB_NAME || 'simulador_db'
+    database: process.env.DB_NAME || 'simulador_db',
+    clearExpired: true,
+    checkExpirationInterval: 900000,
+    createDatabaseTable: true
 };
-const sessionStore = new MySQLStore(options);
+const sessionStore = new MySQLStore(sessionStoreOptions);
 
 app.use(session({
     key: 'simulador_session',
@@ -150,7 +156,14 @@ if (indexRoutes) {
     console.error("Error: No se pudieron cargar las rutas correctamente.");
 }
 
-// 5. Puerto
+// 5. Manejador de errores global (para ver qué causa los 500)
+app.use((err, req, res, next) => {
+    console.error('ERROR GLOBAL:', err.message);
+    console.error('Stack:', err.stack);
+    res.status(500).send('Error interno del servidor: ' + err.message);
+});
+
+// 6. Puerto
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`🚀 Servidor en: http://localhost:${PORT}/login`);
