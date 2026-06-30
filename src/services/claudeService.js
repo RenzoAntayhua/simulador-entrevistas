@@ -208,7 +208,7 @@ No inventes información que no esté en el CV. Si el CV es muy corto o ambiguo,
 
     try {
         if (!CLAUDE_API_KEY || CLAUDE_API_KEY.trim() === '' || CLAUDE_API_KEY.includes('tu_api_key')) {
-            throw new Error('API Key de Claude no configurada. Por favor define CLAUDE_API_KEY en las variables de entorno de tu servidor de despliegue para poder realizar el análisis de CV.');
+            throw new Error('API Key de Claude no configurada.');
         }
 
         const respuesta = await llamarClaude(prompt);
@@ -216,8 +216,17 @@ No inventes información que no esté en el CV. Si el CV es muy corto o ambiguo,
         parsed.usandoFallbackGemini = false;
         return parsed;
     } catch (err) {
-        console.error("Error al analizar CV con IA:", err);
-        throw err;
+        console.error("Error al analizar CV con Claude, intentando fallback a Gemini:", err.message);
+        try {
+            const { llamarGemini } = require('./geminiService');
+            const respuestaGemini = await llamarGemini(prompt);
+            const parsed = limpiarYParsearJSON(respuestaGemini);
+            parsed.usandoFallbackGemini = true;
+            return parsed;
+        } catch (geminiErr) {
+            console.error("Fallback a Gemini tambien fallo:", geminiErr.message);
+            throw new Error('No se pudo analizar el CV. Tanto Claude como Gemini fallaron. Verifica tus API keys.');
+        }
     }
 }
 
@@ -375,8 +384,16 @@ IMPORTANTE: Si usas saltos de línea dentro de los strings (como en codigo_inici
         const parsed = limpiarYParsearJSON(respuesta);
         return Array.isArray(parsed) ? parsed : [];
     } catch (err) {
-        console.error("Error al generar retos con Claude:", err);
-        throw new Error("No se pudieron generar los retos de mejora en este momento.");
+        console.error("Error al generar retos con Claude, intentando fallback a Gemini:", err.message);
+        try {
+            const { llamarGemini } = require('./geminiService');
+            const respuestaGemini = await llamarGemini(prompt);
+            const parsed = limpiarYParsearJSON(respuestaGemini);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (geminiErr) {
+            console.error("Fallback a Gemini tambien fallo:", geminiErr.message);
+            throw new Error("No se pudieron generar los retos de mejora en este momento.");
+        }
     }
 }
 
