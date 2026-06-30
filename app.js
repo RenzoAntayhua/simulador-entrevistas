@@ -102,11 +102,29 @@ io.on('connection', (socket) => {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 2. Sesiones
+// 2. Sesiones en MySQL (Para Producción)
+const MySQLStore = require('express-mysql-session')(session);
+const pool = require('./src/config/db').pool; // Asegúrate de que tu db.js exporta 'pool' directamente o modificar esto.
+// Nota: Si src/config/db.js exporta directamente el pool de promesas, el store de MySQL puede tomarlo o necesita sus propias credenciales.
+// La forma más segura de instanciar es pasarle las credenciales:
+const options = {
+    host: process.env.DB_HOST || 'localhost',
+    port: 3306,
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'root',
+    database: process.env.DB_NAME || 'simulador_db'
+};
+const sessionStore = new MySQLStore(options);
+
 app.use(session({
-    secret: 'clave_secreta_upt',
+    key: 'simulador_session',
+    secret: process.env.SESSION_SECRET || 'clave_secreta_upt',
+    store: sessionStore,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 // 1 día
+    }
 }));
 
 // 3. Variables locales globales (para usarse en vistas)
